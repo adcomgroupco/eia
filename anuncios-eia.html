@@ -783,6 +783,7 @@ function getFiltered(){
     .map(s=>({key:s.getAttribute('data-key'),val:s.value}))
     .filter(f=>f.val);
   return [...S.metaAds,...S.googleAds].filter(a=>{
+    if(a.medium==='Meta'&&!(a._homoFields&&a._homoFields.length)) return false;
     if(tb!=='all'&&a.medium!==tb) return false;
     for(const {key,val} of dynFilters){if(a[key]!==val) return false;}
     if(q){
@@ -890,12 +891,14 @@ function rGoogle(ad){
 
 /* ---- RENDER GRID ---- */
 function renderGrid(){
-  const f=getFiltered(),tot=S.metaAds.length+S.googleAds.length;
-  document.getElementById('meta-pill').textContent='Meta: '+S.metaAds.length;
+  const f=getFiltered();
+  const metaHomo=S.metaAds.filter(a=>a._homoFields&&a._homoFields.length).length;
+  const tot=metaHomo+S.googleAds.length;
+  document.getElementById('meta-pill').textContent='Meta: '+metaHomo;
   document.getElementById('google-pill').textContent='Google: '+S.googleAds.length;
   document.getElementById('count-badge').textContent=f.length+' resultados';
   document.getElementById('cnt-all').textContent=tot;
-  document.getElementById('cnt-meta').textContent=S.metaAds.length;
+  document.getElementById('cnt-meta').textContent=metaHomo;
   document.getElementById('cnt-google').textContent=S.googleAds.length;
   const g=document.getElementById('ads-grid');
   if(!f.length){
