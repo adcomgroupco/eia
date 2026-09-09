@@ -518,14 +518,14 @@ function processAndRender(){
   })).filter(r=>r.fecha);
 
   const mat = RAW_MAT.map(r=>({
-    fecha:parseFecha(r[2]).full,          // Hora de creación (Admisiones)
-    periodo:String(r[8]||'').trim(),      // Periodo de interés (Admisiones)
-    fuente:String(r[1]||'').trim(),       // Fuente de Posible Aspirante (Admisiones): Pauta/Orgánico
-    tipo:String(r[12]||'').trim(),        // Tipo de programa (Admisiones): Pregrado/Posgrado
-    prog:String(r[9]||'').trim(),         // Programa de interés (Admisiones)
-    matriculado:parseInt(r[13])||0,       // Matriculado
-    adm:parseInt(r[14])||0,               // Admitido no matriculado
-    inscrito:parseInt(r[15])||0           // Inscrito
+    fecha:parseFecha(r[3]).full,          // Hora de creación (Admisiones)
+    periodo:String(r[34]||'').trim(),     // Periodo de interés (Admisiones)
+    fuente:String(r[12]||'').trim(),      // Fuente de Posible Aspirante (Admisiones): Pauta/Orgánico
+    tipo:String(r[38]||'').trim(),        // Tipo de programa (Admisiones): Pregrado/Posgrado
+    prog:String(r[35]||'').trim(),        // Programa de interés (Admisiones)
+    matriculado:parseInt(r[39])||0,       // Matriculado
+    adm:parseInt(r[40])||0,               // Admitido no matriculado
+    inscrito:parseInt(r[41])||0           // Inscrito
   })).filter(r=>r.fecha);
 
   const metas = RAW_METAS.map(r=>({
