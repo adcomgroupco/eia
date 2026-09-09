@@ -163,6 +163,41 @@
     font-weight: 300;
     line-height: 1.5;
   }
+  .card-group {
+    cursor: default;
+  }
+  .route-links {
+    display: grid;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .route-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    color: #1A1A1A;
+    background: #F7F7F7;
+    border: 1px solid #EBEBEB;
+    border-radius: 9px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background 0.18s ease, border-color 0.18s ease;
+  }
+  .route-link:hover {
+    background: #FFF9E6;
+    border-color: #FFC000;
+  }
+  .route-link span:last-child {
+    color: #999;
+    transition: color 0.18s ease, transform 0.18s ease;
+  }
+  .route-link:hover span:last-child {
+    color: #FFC000;
+    transform: translateX(2px);
+  }
 
   /* ── INSIGHT BAR ── */
   .insight {
@@ -273,19 +308,29 @@
     <div class="card-desc">Anuncios Activos en plataformas</div>
   </a>
 
-    <!-- CARD 3 -->
-  <a class="card" href="https://adcomgroupco.github.io/eia/reporte-eia" target="_blank">
+  <!-- CARD 3: REPORTES -->
+  <div class="card card-group">
     <div class="card-top">
       <div class="card-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="#FFC000" stroke-width="2" stroke-linecap="round">
-          <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
       </div>
-      <span class="card-arrow">↗</span>
     </div>
-    <div class="card-title">Reportes Generales</div>
-    <div class="card-desc">Reportes de gestión</div>
-  </a>
+    <div class="card-title">Reportes</div>
+    <div class="card-desc">Reportes de gestión y cierre de campaña</div>
+    <div class="route-links">
+      <a class="route-link" href="https://adcomgroupco.github.io/eia/reporte-eia-pregrado" target="_blank" rel="noopener">
+        <span>Reporte General — Pregrado</span><span>↗</span>
+      </a>
+      <a class="route-link" href="https://adcomgroupco.github.io/eia/reporte-eia-posgrado" target="_blank" rel="noopener">
+        <span>Reporte General — Posgrado</span><span>↗</span>
+      </a>
+      <a class="route-link" href="https://adcomgroupco.github.io/eia/informe-cierre-pauta-eia-2026-2" target="_blank" rel="noopener">
+        <span>Informe de Cierre de Pauta 2026-2</span><span>↗</span>
+      </a>
+    </div>
+  </div>
 
   <!-- CARD 6 -->
   <a class="card" href="https://adcomgroupco.github.io/eia/ruta-estrategia-20271" target="_blank" rel="noopener noreferrer">
