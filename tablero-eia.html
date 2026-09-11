@@ -25,7 +25,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-50);color:var(--blac
 .nav-label{font-size:12px;font-weight:700;color:var(--fg-muted);padding:8px 16px 3px}
 .nav-item{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--fg-muted);font-size:12px;font-weight:500;transition:all .15s;line-height:1.3;border:1px solid transparent}
 .nav-item:hover{color:#ccc;background:#111}
-.nav-item.active{color:var(--white);border-left-color:var(--yellow);background:#111}
+.nav-item.active{color:var(--white);border-left-color:var(--accent-fg);background:#111}
 .nav-item svg{width:14px;height:14px;flex-shrink:0}
 .sidebar-bottom{padding:12px;border-top:1px solid #1e1e1e}
 .btn-refresh{width:100%;background:transparent;color:var(--fg-muted);font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:7px;border:1px solid #2a2a2a;border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
@@ -129,7 +129,7 @@ td.bold{font-weight:700}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#FAFAFA}
 tr.total-row td{background:var(--black);color:var(--white);font-weight:700;font-size:12px}
-tr.total-row td.yellow{color:var(--yellow)}
+tr.total-row td.yellow{color:var(--accent)}
 tr.mes-row{background:var(--gray-50);cursor:pointer}
 tr.mes-row td{font-weight:700;font-size:12px;border-bottom:2px solid var(--gray-200)}
 tr.mes-row:hover td{background:#ECECEC}
@@ -149,7 +149,7 @@ tr.no-camp td.bold{font-style:normal;color:#666}
 
 .prog-controls{display:flex;gap:8px;margin-bottom:12px;align-items:center}
 .prog-search{flex:1;max-width:300px;background:var(--white);border:1px solid var(--gray-200);font-family:'Poppins',sans-serif;font-size:12px;padding:8px 12px;border-radius:var(--r-sm);outline:none}
-.prog-search:focus{border-color:var(--yellow)}
+.prog-search:focus{border-color:var(--accent-fg)}
 
 .pct-good{color:#166534;font-weight:700}
 .pct-mid{color:#92400E;font-weight:700}
@@ -167,7 +167,7 @@ tr.no-camp td.bold{font-style:normal;color:#666}
 
 #loader{position:fixed;inset:0;background:rgba(10,10,10,.96);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 .loader-sub{font-size:12px;color:#555;font-family:'Poppins',sans-serif}
-.spinner{width:30px;height:30px;border:3px solid #222;border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite}
+.spinner{width:30px;height:30px;border:3px solid #222;border-top-color:var(--accent-fg);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
@@ -178,7 +178,7 @@ tr.no-camp td.bold{font-style:normal;color:#666}
   <div class="loader-sub">Cargando datos EIA...</div>
 </div>
 
-<aside class="sidebar" data-suelo="tinta">
+<aside class="sidebar" data-roles="tinta">
   <div class="sidebar-logo">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Logo_EIA.svg/200px-Logo_EIA.svg.png" alt="EIA" onerror="this.style.display='none'">
   </div>
