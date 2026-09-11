@@ -4,15 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Dashboard EIA — ADCOM</title>
+<link rel="stylesheet" href="assets/css/adcom-tokens.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --black:#0A0A0A;--white:#FFFFFF;--yellow:#FFC000;
-  --gray-50:#F8F8F8;--gray-100:#F0F0F0;--gray-200:#E0E0E0;--gray-400:#9E9E9E;--gray-600:#555;
+  --black:#050505;--white:#fcfcfa;--yellow:#ffd400;
+  --gray-50:var(--ground);--gray-100:var(--sunken);--gray-200:var(--rule);--gray-400:#9E9E9E;--gray-600:#555;
   --pre:#1877F2;--pos:#7C3AED;--brand:#D97706;--evento:#059669;
-  --fb:#1877F2;--go:#EA4335;--r-sm:8px;--r-md:16px;--sidebar:230px;
+  --fb:#1877F2;--go:#EA4335;--r-sm:var(--radius-sm);--r-md:var(--radius);--sidebar:230px
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Poppins',sans-serif;background:var(--gray-50);color:var(--black);display:flex;min-height:100vh;font-size:13px;overflow-x:hidden}
@@ -21,15 +22,15 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-50);color:var(--blac
 .sidebar-logo{padding:18px 16px 14px;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;gap:10px}
 .sidebar-logo img{height:34px;width:auto;object-fit:contain}
 .sidebar-nav{padding:10px 0;flex:1}
-.nav-label{font-size:9px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:.12em;padding:8px 16px 3px}
-.nav-item{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:#666;font-size:12px;font-weight:500;border-left:3px solid transparent;transition:all .15s;line-height:1.3}
+.nav-label{font-size:12px;font-weight:700;color:var(--fg-muted);padding:8px 16px 3px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;color:var(--fg-muted);font-size:12px;font-weight:500;transition:all .15s;line-height:1.3;border:1px solid transparent}
 .nav-item:hover{color:#ccc;background:#111}
 .nav-item.active{color:var(--white);border-left-color:var(--yellow);background:#111}
 .nav-item svg{width:14px;height:14px;flex-shrink:0}
 .sidebar-bottom{padding:12px;border-top:1px solid #1e1e1e}
-.btn-refresh{width:100%;background:transparent;color:#666;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;padding:7px;border:1px solid #2a2a2a;border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
+.btn-refresh{width:100%;background:transparent;color:var(--fg-muted);font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:7px;border:1px solid #2a2a2a;border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
 .btn-refresh:hover{color:var(--white);border-color:#555}
-.last-update{font-size:9px;color:#333;text-align:center;margin-top:5px}
+.last-update{font-size:12px;color:var(--fg-muted);text-align:center;margin-top:5px}
 
 .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-width:0;overflow-x:hidden}
 .topbar{background:var(--white);border-bottom:2px solid var(--gray-200);padding:0 26px;position:sticky;top:0;z-index:50}
@@ -37,19 +38,19 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-50);color:var(--blac
 .topbar-left{display:flex;align-items:center;gap:14px}
 .topbar-divider{width:1px;height:32px;background:var(--gray-200)}
 .topbar-title{font-size:15px;font-weight:800}
-.topbar-subtitle{font-size:10px;color:#aaa;margin-top:2px}
+.topbar-subtitle{font-size:12px;color:var(--fg-muted);margin-top:2px}
 .topbar-right{display:flex;align-items:center;gap:10px}
-.topbar-badge{font-size:10px;font-weight:700;color:#666;background:var(--gray-50);padding:5px 12px;border-radius:20px;border:1px solid var(--gray-200)}
-.period-tag{font-size:11px;font-weight:600;color:#92400E;background:#FEF3C7;border:1px solid #FDE68A;padding:4px 12px;border-radius:20px;white-space:nowrap}
+.topbar-badge{font-size:12px;font-weight:700;color:#666;background:var(--gray-50);padding:5px 12px;border-radius:var(--radius);border:1px solid var(--gray-200)}
+.period-tag{font-size:12px;font-weight:600;color:#92400E;background:#FEF3C7;border:1px solid #FDE68A;padding:4px 12px;border-radius:var(--radius);white-space:nowrap}
 .topbar-filters{display:flex;align-items:center;gap:8px;padding:0 0 11px;flex-wrap:wrap}
-.topbar-filters label{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.08em;margin-right:2px}
+.topbar-filters label{font-size:12px;font-weight:700;color:var(--fg-muted);margin-right:2px}
 .tf-group{display:flex;align-items:center;gap:5px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:4px 9px}
 .tf-select,.tf-input{background:transparent;border:none;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;color:var(--black);outline:none;cursor:pointer;padding:2px 0}
 .tf-input{width:95px}
 .tf-sep{color:#ccc;font-size:15px}
-.btn-apply{background:var(--yellow);color:var(--black);font-family:'Poppins',sans-serif;font-size:11px;font-weight:800;padding:7px 16px;border:none;border-radius:var(--r-sm);cursor:pointer}
+.btn-apply{background:var(--yellow);color:var(--black);font-family:'Poppins',sans-serif;font-size:12px;font-weight:800;padding:7px 16px;border:none;border-radius:var(--r-sm);cursor:pointer}
 .btn-apply:hover{opacity:.85}
-.btn-reset{background:transparent;color:#999;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;padding:7px 10px;border:1px solid var(--gray-200);border-radius:var(--r-sm);cursor:pointer}
+.btn-reset{background:transparent;color:var(--fg-muted);font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:7px 10px;border:1px solid var(--gray-200);border-radius:var(--r-sm);cursor:pointer}
 .loading-bar{height:3px;background:var(--gray-200);overflow:hidden}
 .loading-bar.active::after{content:'';display:block;height:100%;width:40%;background:var(--yellow);animation:ldbar 1s ease-in-out infinite}
 @keyframes ldbar{0%{margin-left:-40%}100%{margin-left:100%}}
@@ -59,7 +60,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-50);color:var(--blac
 .tab-panel.active{display:block}
 .section{margin-bottom:28px;opacity:0;transform:translateY(14px);transition:all .4s ease}
 .section.visible{opacity:1;transform:none}
-.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#aaa;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.section-title{font-size:12px;font-weight:700;color:var(--fg-muted);margin-bottom:12px;display:flex;align-items:center;gap:10px}
 .section-title::after{content:'';flex:1;height:1px;background:var(--gray-200)}
 
 .kpi-grid{display:grid;gap:12px;margin-bottom:18px}
@@ -76,42 +77,42 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-50);color:var(--blac
 .kpi-card.accent-evento{border-top:3px solid var(--evento)}
 .kpi-card.accent-fb{border-top:3px solid var(--fb)}
 .kpi-card.accent-go{border-top:3px solid var(--go)}
-.kpi-label{font-size:9px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.kpi-label{font-size:12px;font-weight:700;color:var(--fg-muted);margin-bottom:5px}
 .kpi-value{font-size:18px;font-weight:800;line-height:1.2;word-break:break-all}
-.kpi-sub{font-size:10px;color:#aaa;margin-top:3px}
+.kpi-sub{font-size:12px;color:var(--fg-muted);margin-top:3px}
 .kpi-bar-wrap{margin-top:8px}
-.kpi-bar-label{display:flex;justify-content:space-between;font-size:9px;color:#aaa;margin-bottom:3px}
+.kpi-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--fg-muted);margin-bottom:3px}
 .kpi-bar-label span:last-child{font-weight:700;color:#555}
-.kpi-bar{height:4px;background:var(--gray-100);border-radius:2px;overflow:hidden}
-.kpi-bar-fill{height:100%;border-radius:2px;transition:width .7s ease}
-.fill-pre{background:var(--pre)}.fill-pos{background:var(--pos)}.fill-yellow{background:var(--yellow)}.fill-brand{background:var(--brand)}.fill-evento{background:var(--evento)}
+.kpi-bar{height:4px;background:var(--gray-100);border-radius:0;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:0;transition:width .7s ease}
+.fill-pre{background:var(--pre)}.fill-pos{background:var(--pos)}.fill-yellow{background:var(--accent-fg)}.fill-brand{background:var(--accent-fg)}.fill-evento{background:var(--evento)}
 
 .desglose-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
 .desglose-card{background:var(--white);border-radius:var(--r-md);border:1px solid var(--gray-200);padding:14px 16px}
-.desglose-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;margin-bottom:8px}
+.desglose-badge{display:inline-block;padding:2px 8px;border-radius:0;font-size:12px;font-weight:700;margin-bottom:8px}
 .badge-pre{background:#DBEAFE;color:#1E40AF}
 .badge-pos{background:#EDE9FE;color:#5B21B6}
 .badge-brand{background:#FEF3C7;color:#92400E}
 .badge-evento{background:#D1FAE5;color:#065F46}
 .desglose-inv{font-size:17px;font-weight:800;margin-bottom:4px}
-.desglose-sub{font-size:10px;color:#aaa}
+.desglose-sub{font-size:12px;color:var(--fg-muted)}
 
 .canal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
 .canal-card{background:var(--white);border-radius:var(--r-md);border:1px solid var(--gray-200);overflow:hidden}
 .canal-header{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--gray-100)}
-.canal-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:var(--white);flex-shrink:0}
+.canal-icon{width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:var(--fg);flex-shrink:0}
 .canal-name{font-size:12px;font-weight:700}
-.canal-name-sub{font-size:10px;color:#aaa;margin-top:1px}
+.canal-name-sub{font-size:12px;color:var(--fg-muted);margin-top:1px}
 .canal-body{padding:12px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.c-label{font-size:9px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.05em}
+.c-label{font-size:12px;font-weight:700;color:var(--fg-muted);letter-spacing:.05em}
 .c-value{font-size:13px;font-weight:700;margin-top:2px;word-break:break-all}
-.c-value.yellow{color:#B8860B}
+.c-value.yellow{color:var(--accent-fg)}
 .c-value.green{color:#059669}
 
 .charts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
 @media(max-width:1300px){.charts-grid{grid-template-columns:1fr}}
 .chart-card{background:var(--white);border-radius:var(--r-md);border:1px solid var(--gray-200);padding:15px 17px}
-.chart-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#aaa;margin-bottom:10px}
+.chart-title{font-size:12px;font-weight:700;color:var(--fg-muted);margin-bottom:10px}
 .chart-canvas{position:relative;height:175px}
 
 .table-wrap{background:var(--white);border-radius:var(--r-md);border:1px solid var(--gray-200);overflow:hidden;margin-bottom:14px}
@@ -120,7 +121,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-50);color:var(--blac
 .table-scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 thead tr{background:var(--gray-50);border-bottom:2px solid var(--gray-200)}
-th{padding:8px 10px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#888;white-space:nowrap}
+th{padding:8px 10px;text-align:left;font-size:12px;font-weight:700;color:var(--fg-muted);white-space:nowrap}
 th.num{text-align:right}
 td{padding:8px 10px;border-bottom:1px solid var(--gray-100);font-size:12px}
 td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap}
@@ -132,9 +133,9 @@ tr.total-row td.yellow{color:var(--yellow)}
 tr.mes-row{background:var(--gray-50);cursor:pointer}
 tr.mes-row td{font-weight:700;font-size:12px;border-bottom:2px solid var(--gray-200)}
 tr.mes-row:hover td{background:#ECECEC}
-.toggle-icon{display:inline-block;transition:transform .2s;margin-right:6px;color:#aaa;font-style:normal}
+.toggle-icon{display:inline-block;transition:transform .2s;margin-right:6px;color:var(--fg-muted);font-style:normal}
 .toggle-icon.open{transform:rotate(90deg)}
-tr.sub-row td{background:#FAFAFA;font-size:11px}
+tr.sub-row td{background:#FAFAFA;font-size:12px}
 tr.sub-row.hidden{display:none}
 tr.sub-row td:first-child{padding-left:28px;color:#666}
 th.sortable{cursor:pointer;user-select:none}
@@ -144,7 +145,7 @@ th.sort-active{color:var(--black)!important}
 /* fila sin campaña */
 tr.no-camp td{color:#999;font-style:italic}
 tr.no-camp td.bold{font-style:normal;color:#666}
-.badge-nocamp{display:inline-block;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;background:#F1F5F9;color:#64748B;margin-left:4px;vertical-align:middle;font-style:normal}
+.badge-nocamp{display:inline-block;padding:1px 5px;border-radius:0;font-size:12px;font-weight:700;background:#F1F5F9;color:#64748B;margin-left:4px;vertical-align:middle;font-style:normal}
 
 .prog-controls{display:flex;gap:8px;margin-bottom:12px;align-items:center}
 .prog-search{flex:1;max-width:300px;background:var(--white);border:1px solid var(--gray-200);font-family:'Poppins',sans-serif;font-size:12px;padding:8px 12px;border-radius:var(--r-sm);outline:none}
@@ -152,14 +153,14 @@ tr.no-camp td.bold{font-style:normal;color:#666}
 
 .pct-good{color:#166534;font-weight:700}
 .pct-mid{color:#92400E;font-weight:700}
-.pct-low{color:#aaa;font-weight:600}
+.pct-low{color:var(--fg-muted);font-weight:600}
 
-.bp{display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;text-transform:uppercase}
+.bp{display:inline-block;padding:2px 6px;border-radius:0;font-size:12px;font-weight:700}
 .bp-pauta{background:#DBEAFE;color:#1E40AF}
 .bp-org{background:#D1FAE5;color:#065F46}
 .bp-total{background:#F1F5F9;color:#475569}
 
-.sub-section-title{font-size:11px;font-weight:700;color:#555;margin:20px 0 10px;padding-left:2px;display:flex;align-items:center;gap:8px}
+.sub-section-title{font-size:12px;font-weight:700;color:#555;margin:20px 0 10px;padding-left:2px;display:flex;align-items:center;gap:8px;max-width:var(--measure)}
 .sub-section-title .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .dot-brand{background:var(--brand)}
 .dot-evento{background:var(--evento)}
@@ -177,7 +178,7 @@ tr.no-camp td.bold{font-style:normal;color:#666}
   <div class="loader-sub">Cargando datos EIA...</div>
 </div>
 
-<aside class="sidebar">
+<aside class="sidebar" data-suelo="tinta">
   <div class="sidebar-logo">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Logo_EIA.svg/200px-Logo_EIA.svg.png" alt="EIA" onerror="this.style.display='none'">
   </div>
@@ -401,7 +402,7 @@ const fmtP   = n => (n===null||n===undefined||isNaN(n))?'—':n.toFixed(1)+'%';
 function parseInv(v){
   if(!v) return 0;
   const s=String(v).replace(/[$\s]/g,'').replace(/\./g,'').replace(',','.');
-  return parseFloat(s)||0;
+  return parseFloat(s)||0
 }
 
 function parseFecha(v){
@@ -409,49 +410,49 @@ function parseFecha(v){
   if(!isNaN(v) && String(v).trim().length<=5){
     const d=new Date(Math.round((parseFloat(v)-25569)*86400*1000));
     const y=d.getUTCFullYear(),m=String(d.getUTCMonth()+1).padStart(2,'0'),dy=String(d.getUTCDate()).padStart(2,'0');
-    return {full:`${y}-${m}-${dy}`,mes:`${y}-${m}`,date:d};
+    return {full:`${y}-${m}-${dy}`,mes:`${y}-${m}`,date:d}
   }
   if(v instanceof Date){
     const y=v.getFullYear(),m=String(v.getMonth()+1).padStart(2,'0'),d=String(v.getDate()).padStart(2,'0');
-    return {full:`${y}-${m}-${d}`,mes:`${y}-${m}`,date:v};
+    return {full:`${y}-${m}-${d}`,mes:`${y}-${m}`,date:v}
   }
   const s=String(v).trim();
   let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if(m){
     const dy=m[1].padStart(2,'0'),mo=m[2].padStart(2,'0'),yr=m[3];
-    return {full:`${yr}-${mo}-${dy}`,mes:`${yr}-${mo}`,date:new Date(`${yr}-${mo}-${dy}`)};
+    return {full:`${yr}-${mo}-${dy}`,mes:`${yr}-${mo}`,date:new Date(`${yr}-${mo}-${dy}`)}
   }
   m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if(m) return {full:`${m[1]}-${m[2]}-${m[3]}`,mes:`${m[1]}-${m[2]}`,date:new Date(`${m[1]}-${m[2]}-${m[3]}`)};
-  return {full:'',mes:'',date:null};
+  return {full:'',mes:'',date:null}
 }
 
 const MESES_ES=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-const fmtMes = s => { const p=s.split('-'); return p.length<2?s:(MESES_ES[parseInt(p[1])]||p[1])+' '+p[0]; };
-function pctClass(v){ return v>=80?'pct-good':v>=50?'pct-mid':'pct-low'; }
+const fmtMes = s => { const p=s.split('-'); return p.length<2?s:(MESES_ES[parseInt(p[1])]||p[1])+' '+p[0] };
+function pctClass(v){ return v>=80?'pct-good':v>=50?'pct-mid':'pct-low' }
 
 let _firstLoad=true;
 function refreshData(){
   showLoading(true);
   let done=0; const TOTAL=4;
   const finish=()=>{
-    if(_firstLoad){ _firstLoad=false; onPeriodoChange(); } // 1ra carga: sincroniza fechas con el periodo vigente
+    if(_firstLoad){ _firstLoad=false; onPeriodoChange() } // 1ra carga: sincroniza fechas con el periodo vigente
     else processAndRender();
-    showLoading(false);
+    showLoading(false)
   };
   const safety=setTimeout(finish,22000);
-  const done_=()=>{ if(++done===TOTAL){clearTimeout(safety);finish();} };
-  const stripH=(d,re)=>{ if(d.length&&re.test(String(d[0][0]||''))) d.shift(); return d; };
+  const done_=()=>{ if(++done===TOTAL){clearTimeout(safety);finish()} };
+  const stripH=(d,re)=>{ if(d.length&&re.test(String(d[0][0]||''))) d.shift(); return d };
   const fetchCSV=(url,callback)=>{
     fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache, no-store'}})
       .then(r=>r.text())
-      .then(text=>{ const r=Papa.parse(text,{header:false,skipEmptyLines:true}); callback(r.data); })
-      .catch(()=>callback([]));
+      .then(text=>{ const r=Papa.parse(text,{header:false,skipEmptyLines:true}); callback(r.data) })
+      .catch(()=>callback([]))
   };
-  fetchCSV(URL_RG(),    d=>{ RAW_RG=stripH(d,/date|fecha|camp/i);  done_(); });
-  fetchCSV(URL_MAT(),   d=>{ RAW_MAT=stripH(d,/^id|nombre|admi/i); done_(); });
-  fetchCSV(URL_LEADS(), d=>{ RAW_LEADS=stripH(d,/^id$/i);          done_(); });
-  fetchCSV(URL_METAS(), d=>{ RAW_METAS=stripH(d,/periodo|fecha/i); populatePeriodoSelector(); done_(); });
+  fetchCSV(URL_RG(),    d=>{ RAW_RG=stripH(d,/date|fecha|camp/i);  done_() });
+  fetchCSV(URL_MAT(),   d=>{ RAW_MAT=stripH(d,/^id|nombre|admi/i); done_() });
+  fetchCSV(URL_LEADS(), d=>{ RAW_LEADS=stripH(d,/^id$/i);          done_() });
+  fetchCSV(URL_METAS(), d=>{ RAW_METAS=stripH(d,/periodo|fecha/i); populatePeriodoSelector(); done_() })
 }
 
 function populatePeriodoSelector(){
@@ -468,7 +469,7 @@ function populatePeriodoSelector(){
     + periodos.map(p=>`<option value="${p.periodo}">${p.periodo}</option>`).join('');
   // Mantener selección previa si sigue existiendo; si no, usar el vigente/último
   if(prevValue && periodos.some(p=>p.periodo===prevValue)) sel.value=prevValue;
-  else sel.value=vigente ? vigente.periodo : '';
+  else sel.value=vigente ? vigente.periodo : ''
 }
 
 function periodoVigente(periodos){
@@ -480,7 +481,7 @@ function periodoVigente(periodos){
   const enCurso=rows.find(r=>r.ini&&r.fin&&r.ini<=hoy&&hoy<=r.fin);
   if(enCurso) return periodos.find(p=>p.periodo===enCurso.periodo);
   // Si ninguno cubre hoy, usar el más reciente (último por Fecha Inicio)
-  return periodos[periodos.length-1];
+  return periodos[periodos.length-1]
 }
 
 function onPeriodoChange(){
@@ -494,10 +495,10 @@ function onPeriodoChange(){
       const iniMin=rango.reduce((a,r)=>a&&a<r.ini?a:r.ini,rango[0].ini);
       const finMax=rango.reduce((a,r)=>a&&a>r.fin?a:r.fin,rango[0].fin);
       $('f-desde').value=iniMin;
-      $('f-hasta').value=finMax;
+      $('f-hasta').value=finMax
     }
   }
-  processAndRender();
+  processAndRender()
 }
 
 function processAndRender(){
@@ -509,7 +510,7 @@ function processAndRender(){
     const f=parseFecha(r[0]);
     return {fecha:f.full,mes:f.mes,medio:String(r[5]||'').trim(),
             modal:String(r[6]||'').trim(),prog:String(r[7]||'').trim(),
-            inv:parseInv(r[3]),reg:parseInt(r[4])||0};
+            inv:parseInv(r[3]),reg:parseInt(r[4])||0}
   }).filter(r=>r.fecha);
 
   const leads = RAW_LEADS.map(r=>({
@@ -564,7 +565,7 @@ function processAndRender(){
 
   renderTab('pre');
   renderTab('pos');
-  revealSections();
+  revealSections()
 }
 
 function renderTab(tab){
@@ -621,7 +622,7 @@ function renderTab(tab){
       <div><span class="desglose-badge ${d.badge}">${d.label}</span></div>
       <div class="desglose-inv">${fmtCOP(d.inv)}</div>
       <div class="desglose-sub">${d.sub}</div>
-    </div>`).join('');
+    </div>`).join('')
   }
 
   renderCanalCards(tab, rgModal, rgBrand, rgEvento, inv_modal);
@@ -632,7 +633,7 @@ function renderTab(tab){
 
   buildProgData(tab, modal, rgModal, rgBrand, rgEvento, leadsModal, lPauta, lOrg, matModal, matPauta, matOrgInsc);
   renderProgTable(tab);
-  renderMesTable(tab, rg);
+  renderMesTable(tab, rg)
 }
 
 function renderBrandingEvento(rgAll, metasAll){
@@ -645,7 +646,7 @@ function renderBrandingEvento(rgAll, metasAll){
 
   if($('pre-brand-table')){
     if(brand.length===0){
-      $('pre-brand-table').innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:12px">Sin datos de Branding en el período seleccionado</div>';
+      $('pre-brand-table').innerHTML='<div style="padding:20px;text-align:center;color:var(--fg-muted);font-size:12px">Sin datos de Branding en el período seleccionado</div>'
     } else {
       const progs_b = [...new Set(brand.map(r=>r.prog))];
       const rows_b  = progs_b.map(p=>{
@@ -655,18 +656,18 @@ function renderBrandingEvento(rgAll, metasAll){
         const pct= meta_b?tt/meta_b*100:null;
         return `<tr>
           <td class="bold">${p}</td>
-          <td class="num" style="color:var(--fb)">${fb>0?fmtCOP(fb):'—'}</td>
-          <td class="num" style="color:var(--go)">${go>0?fmtCOP(go):'—'}</td>
+          <td class="num" style="color:var(--fg-muted)">${fb>0?fmtCOP(fb):'—'}</td>
+          <td class="num" style="color:var(--neg)">${go>0?fmtCOP(go):'—'}</td>
           <td class="num bold">${fmtCOP(tt)}</td>
           <td class="num">${fmtCOP(meta_b)}</td>
           <td class="num ${pct!==null?pctClass(pct):''}">${pct!==null?fmtP(pct):'—'}</td>
-        </tr>`;
+        </tr>`
       }).join('');
       $('pre-brand-table').innerHTML=`<table>
         <thead><tr>
           <th>Campaña</th>
-          <th class="num" style="color:var(--fb)">Facebook</th>
-          <th class="num" style="color:var(--go)">Google</th>
+          <th class="num" style="color:var(--fg-muted)">Facebook</th>
+          <th class="num" style="color:var(--neg)">Google</th>
           <th class="num">Total Inv.</th>
           <th class="num">Meta Ppto.</th>
           <th class="num">% Ejec.</th>
@@ -681,7 +682,7 @@ function renderBrandingEvento(rgAll, metasAll){
             <td class="num yellow">${ejec_b!==null?fmtP(ejec_b):'—'}</td>
           </tr>`:''}
         </tbody>
-      </table>`;
+      </table>`
     }
   }
 
@@ -691,7 +692,7 @@ function renderBrandingEvento(rgAll, metasAll){
 
   if($('pre-evento-table')){
     if(evento.length===0){
-      $('pre-evento-table').innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:12px">Sin datos de Eventos en el período seleccionado</div>';
+      $('pre-evento-table').innerHTML='<div style="padding:20px;text-align:center;color:var(--fg-muted);font-size:12px">Sin datos de Eventos en el período seleccionado</div>'
     } else {
       const rows_e = progs_e.map(p=>{
         const fb = evento.filter(r=>r.prog===p&&r.medio==='Facebook').reduce((a,r)=>a+r.inv,0);
@@ -699,16 +700,16 @@ function renderBrandingEvento(rgAll, metasAll){
         const tt = fb+go;
         return `<tr>
           <td class="bold">${p}</td>
-          <td class="num" style="color:var(--fb)">${fb>0?fmtCOP(fb):'—'}</td>
-          <td class="num" style="color:var(--go)">${go>0?fmtCOP(go):'—'}</td>
+          <td class="num" style="color:var(--fg-muted)">${fb>0?fmtCOP(fb):'—'}</td>
+          <td class="num" style="color:var(--neg)">${go>0?fmtCOP(go):'—'}</td>
           <td class="num bold">${fmtCOP(tt)}</td>
-        </tr>`;
+        </tr>`
       }).join('');
       $('pre-evento-table').innerHTML=`<table>
         <thead><tr>
           <th>Evento</th>
-          <th class="num" style="color:var(--fb)">Facebook</th>
-          <th class="num" style="color:var(--go)">Google</th>
+          <th class="num" style="color:var(--fg-muted)">Facebook</th>
+          <th class="num" style="color:var(--neg)">Google</th>
           <th class="num">Total Inv.</th>
         </tr></thead>
         <tbody>${rows_e}
@@ -719,7 +720,7 @@ function renderBrandingEvento(rgAll, metasAll){
             <td class="num yellow">${fmtCOP(inv_tot_e)}</td>
           </tr>
         </tbody>
-      </table>`;
+      </table>`
     }
   }
 }
@@ -737,7 +738,7 @@ function renderCanalCards(tab, rgModal, rgBrand, rgEvento, inv_modal){
     const cpl_p = reg?inv/reg:0;
     const part  = inv_modal?inv/inv_modal*100:0;
     const invBE = tab==='pre'?[...rgBrand,...rgEvento].filter(r=>r.medio===c.key).reduce((a,r)=>a+r.inv,0):0;
-    const invBEstr = invBE>0?`<div style="font-size:10px;color:#aaa;margin-top:3px">B+E: ${fmtCOP(invBE)}</div>`:'';
+    const invBEstr = invBE>0?`<div style="font-size:12px;color:var(--fg-muted);margin-top:3px">B+E: ${fmtCOP(invBE)}</div>`:'';
     return `<div class="canal-card">
       <div class="canal-header">
         <div class="canal-icon" style="background:${c.bg}">${c.icon}</div>
@@ -748,31 +749,31 @@ function renderCanalCards(tab, rgModal, rgBrand, rgEvento, inv_modal){
           <div class="c-label">Inversión</div>
           <div class="c-value">${fmtCOP(inv)}</div>
           ${invBEstr}
-          <div style="font-size:10px;color:#aaa;margin-top:2px">${fmtP(part)} del total</div>
+          <div style="font-size:12px;color:var(--fg-muted);margin-top:2px">${fmtP(part)} del total</div>
         </div>
         <div>
           <div class="c-label">Leads Plataforma</div>
           <div class="c-value">${fmtN(reg)}</div>
-          <div class="c-value yellow" style="font-size:11px;margin-top:3px">CPL: ${fmtCOP(cpl_p)}</div>
+          <div class="c-value yellow" style="font-size:12px;margin-top:3px">CPL: ${fmtCOP(cpl_p)}</div>
         </div>
         <div>
           <div class="c-label">Días activos</div>
           <div class="c-value">${[...new Set(rc.map(r=>r.fecha))].length}</div>
         </div>
       </div>
-    </div>`;
-  }).join('');
+    </div>`
+  }).join('')
 }
 
 function buildCharts(tab, rgModal, lPauta){
   const dailyInv={}, dailyLC={};
-  rgModal.forEach(r=>{ if(r.fecha) dailyInv[r.fecha]=(dailyInv[r.fecha]||0)+r.inv; });
-  lPauta.forEach(r=>{ if(r.fecha) dailyLC[r.fecha]=(dailyLC[r.fecha]||0)+1; });
+  rgModal.forEach(r=>{ if(r.fecha) dailyInv[r.fecha]=(dailyInv[r.fecha]||0)+r.inv });
+  lPauta.forEach(r=>{ if(r.fecha) dailyLC[r.fecha]=(dailyLC[r.fecha]||0)+1 });
   const days=[...new Set([...Object.keys(dailyInv),...Object.keys(dailyLC)])].sort();
-  const labels=days.map(d=>{ const p=d.split('-'); return p[2]+'/'+p[1]; });
+  const labels=days.map(d=>{ const p=d.split('-'); return p[2]+'/'+p[1] });
   const inv=days.map(d=>dailyInv[d]||0);
   const lc=days.map(d=>dailyLC[d]||0);
-  const cpl=days.map(d=>{ const i=dailyInv[d]||0,l=dailyLC[d]||0; return l?Math.round(i/l):0; });
+  const cpl=days.map(d=>{ const i=dailyInv[d]||0,l=dailyLC[d]||0; return l?Math.round(i/l):0 });
 
   const mk=(id,label,data,color,isCOP)=>{
     const ctx=document.getElementById(id);
@@ -795,7 +796,7 @@ function buildCharts(tab, rgModal, lPauta){
         plugins:{
           legend:{display:false},
           tooltip:{
-            backgroundColor:'#1A1A1A',titleColor:'#fff',bodyColor:'#FFC000',
+            backgroundColor:'#1A1A1A',titleColor:'#fff',bodyColor:'#ffd400',
             padding:10,cornerRadius:6,
             callbacks:{
               title:items=>items[0].label,
@@ -804,24 +805,24 @@ function buildCharts(tab, rgModal, lPauta){
           }
         },
         scales:{
-          x:{ticks:{font:{size:9,family:'Poppins'},maxTicksLimit:14,color:'#aaa'},grid:{display:false},border:{display:false}},
-          y:{ticks:{font:{size:9,family:'Poppins'},color:'#aaa',callback:v=>isCOP?'$'+Math.round(v/1000)+'k':v},
+          x:{ticks:{font:{size:12,family:'Poppins'},maxTicksLimit:14,color:'#656560'},grid:{display:false},border:{display:false}},
+          y:{ticks:{font:{size:12,family:'Poppins'},color:'#656560',callback:v=>isCOP?'$'+Math.round(v/1000)+'k':v},
             grid:{color:'#F0F0F0'},border:{display:false}}
         }
       }
-    });
+    })
   };
-  mk(tab+'-chart-inv',  'Inversión', inv, '#FFC000',true);
+  mk(tab+'-chart-inv',  'Inversión', inv, '#ffd400',true);
   mk(tab+'-chart-leads','Leads CRM', lc,  '#1877F2',false);
-  mk(tab+'-chart-cpl',  'CPL CRM',   cpl, '#7C3AED',true);
+  mk(tab+'-chart-cpl',  'CPL CRM',   cpl, '#7C3AED',true)
 }
 
 function renderMetas(tab, modal, rgModal, lPauta, matPauta, metasAll){
   const metas = metasAll.filter(m=>m.modal===modal&&m.prog);
   if(!metas.length){
-    $(tab+'-metas-table').innerHTML='<div style="padding:24px;text-align:center;color:#aaa">Sin datos de metas</div>';
+    $(tab+'-metas-table').innerHTML='<div style="padding:24px;text-align:center;color:var(--fg-muted)">Sin datos de metas</div>';
     $(tab+'-metas-summary').innerHTML='';
-    return;
+    return
   }
   const totPpto  = metas.reduce((a,m)=>a+m.ppto,0);
   const totLeadM = metas.reduce((a,m)=>a+m.leads_meta,0);
@@ -871,7 +872,7 @@ function renderMetas(tab, modal, rgModal, lPauta, matPauta, metasAll){
       <td class="num">${fmtNz(m.mat_meta)}</td>
       <td class="num bold">${fmtN(matP)}</td>
       ${pCell(pM2)}
-    </tr>`;
+    </tr>`
   }).join('');
 
   const pI3=totPpto?invReal/totPpto*100:null,pL3=totLeadM?lc_tot/totLeadM*100:null,pM3=totMatM?mat_tot/totMatM*100:null;
@@ -893,7 +894,7 @@ function renderMetas(tab, modal, rgModal, lPauta, matPauta, metasAll){
       <th class="num">Meta Mat.</th><th class="num">Matr. Real</th><th class="num">% Mat.</th>
     </tr></thead>
     <tbody>${rows}${totRow}</tbody>
-  </table>`;
+  </table>`
 }
 
 // ── BUILD PROG DATA — incluye programas CRM sin campaña ───────────────────────
@@ -905,9 +906,9 @@ function buildProgData(tab, modal, rgModal, rgBrand, rgEvento, leadsModal, lPaut
     if(!r.prog) return;
     if(!map[r.prog]) map[r.prog]={prog:r.prog,inv_total:0,inv_fb:0,inv_go:0,reg_fb:0,reg_go:0,reg_total:0,tiene_campana:true};
     map[r.prog].inv_total+=r.inv;
-    if(r.medio==='Facebook'){map[r.prog].inv_fb+=r.inv;map[r.prog].reg_fb+=r.reg;}
-    if(r.medio==='Google'){map[r.prog].inv_go+=r.inv;map[r.prog].reg_go+=r.reg;}
-    map[r.prog].reg_total+=r.reg;
+    if(r.medio==='Facebook'){map[r.prog].inv_fb+=r.inv;map[r.prog].reg_fb+=r.reg}
+    if(r.medio==='Google'){map[r.prog].inv_go+=r.inv;map[r.prog].reg_go+=r.reg}
+    map[r.prog].reg_total+=r.reg
   });
 
   // 2. Luego recorremos todos los leads CRM y añadimos programas que no están en RG
@@ -915,26 +916,26 @@ function buildProgData(tab, modal, rgModal, rgBrand, rgEvento, leadsModal, lPaut
     if(!r.prog) return;
     if(!map[r.prog]){
       // Programa que existe en CRM pero NO tiene campaña en RG
-      map[r.prog]={prog:r.prog,inv_total:0,inv_fb:0,inv_go:0,reg_fb:0,reg_go:0,reg_total:0,tiene_campana:false};
+      map[r.prog]={prog:r.prog,inv_total:0,inv_fb:0,inv_go:0,reg_fb:0,reg_go:0,reg_total:0,tiene_campana:false}
     }
   });
   lOrg.forEach(r=>{
     if(!r.prog) return;
     if(!map[r.prog]){
-      map[r.prog]={prog:r.prog,inv_total:0,inv_fb:0,inv_go:0,reg_fb:0,reg_go:0,reg_total:0,tiene_campana:false};
+      map[r.prog]={prog:r.prog,inv_total:0,inv_fb:0,inv_go:0,reg_fb:0,reg_go:0,reg_total:0,tiene_campana:false}
     }
   });
   // Matrículas también pueden traer programas nuevos
   matPauta.forEach(r=>{
     if(!r.prog) return;
     if(!map[r.prog]){
-      map[r.prog]={prog:r.prog,inv_total:0,inv_fb:0,inv_go:0,reg_fb:0,reg_go:0,reg_total:0,tiene_campana:false};
+      map[r.prog]={prog:r.prog,inv_total:0,inv_fb:0,inv_go:0,reg_fb:0,reg_go:0,reg_total:0,tiene_campana:false}
     }
   });
   matOrgInsc.forEach(r=>{
     if(!r.prog) return;
     if(!map[r.prog]){
-      map[r.prog]={prog:r.prog,inv_total:0,inv_fb:0,inv_go:0,reg_fb:0,reg_go:0,reg_total:0,tiene_campana:false};
+      map[r.prog]={prog:r.prog,inv_total:0,inv_fb:0,inv_go:0,reg_fb:0,reg_go:0,reg_total:0,tiene_campana:false}
     }
   });
 
@@ -948,14 +949,14 @@ function buildProgData(tab, modal, rgModal, rgBrand, rgEvento, leadsModal, lPaut
     const mp      = matPauta.filter(r=>r.prog===p.prog).length;
     const mo      = matOrgInsc.filter(r=>r.prog===p.prog).length;
     const conv    = lc?mp/lc*100:0;
-    return {...p,cpl_fb,cpl_go,cpl_plat,lc,lo,cpl_crm,mp,mo,conv};
-  });
+    return {...p,cpl_fb,cpl_go,cpl_plat,lc,lo,cpl_crm,mp,mo,conv}
+  })
 }
 
 function sortProg(tab,col){
   const s=_progSort[tab];
   s.col===col?s.dir*=-1:(s.col=col,s.dir=-1);
-  renderProgTable(tab);
+  renderProgTable(tab)
 }
 
 function renderProgTable(tab){
@@ -966,13 +967,13 @@ function renderProgTable(tab){
   rows.sort((a,b)=>{
     // Programas sin campaña siempre al final
     if(a.tiene_campana!==b.tiene_campana) return a.tiene_campana?-1:1;
-    return (typeof a[s.col]==='string'?a[s.col].localeCompare(b[s.col]):(a[s.col]||0)-(b[s.col]||0))*s.dir;
+    return (typeof a[s.col]==='string'?a[s.col].localeCompare(b[s.col]):(a[s.col]||0)-(b[s.col]||0))*s.dir
   });
 
   const th=(col,lbl,num,style)=>{
     const act=s.col===col;
     return `<th class="${num?'num ':''} sortable${act?' sort-active':''}" ${style?`style="${style}"`:''}
-      onclick="sortProg('${tab}','${col}')">${lbl}${act?(s.dir>0?' ↑':' ↓'):''}</th>`;
+      onclick="sortProg('${tab}','${col}')">${lbl}${act?(s.dir>0?' ↑':' ↓'):''}</th>`
   };
 
   // Totales solo de programas con campaña para inversión, todos para CRM
@@ -988,7 +989,7 @@ function renderProgTable(tab){
   const tMO =rows.reduce((a,r)=>a+r.mo,0);
 
   const tbody=rows.map(p=>{
-    const cc=p.conv>5?'color:#166534':p.conv>1?'color:#92400E':'color:#aaa';
+    const cc=p.conv>5?'color:#166534':p.conv>1?'color:#92400E':'color:var(--fg-muted)';
     const nocamp=!p.tiene_campana;
     // Si no tiene campaña: inversiones y leads plataforma en —
     return `<tr${nocamp?' class="no-camp"':''}>
@@ -996,18 +997,18 @@ function renderProgTable(tab){
         ${p.prog}${nocamp?'<span class="badge-nocamp">sin campaña</span>':''}
       </td>
       <td class="num bold">${nocamp?'—':fmtCOP(p.inv_total)}</td>
-      <td class="num" style="color:var(--fb)">${nocamp?'—':fmtCOP(p.inv_fb)}</td>
-      <td class="num" style="color:var(--go)">${nocamp?'—':fmtCOP(p.inv_go)}</td>
+      <td class="num" style="color:var(--fg-muted)">${nocamp?'—':fmtCOP(p.inv_fb)}</td>
+      <td class="num" style="color:var(--neg)">${nocamp?'—':fmtCOP(p.inv_go)}</td>
       <td class="num">${nocamp?'—':fmtN(p.reg_fb)}</td>
       <td class="num">${nocamp?'—':fmtN(p.reg_go)}</td>
       <td class="num bold">${nocamp?'—':fmtN(p.reg_total)}</td>
-      <td class="num" style="color:#B8860B;font-weight:700">${nocamp?'—':fmtCOP(p.cpl_plat)}</td>
+      <td class="num" style="color:var(--accent-fg);font-weight:700">${nocamp?'—':fmtCOP(p.cpl_plat)}</td>
       <td class="num bold">${fmtN(p.lc)}</td>
-      <td class="num" style="color:#B8860B;font-weight:700">${nocamp?'—':fmtCOP(p.cpl_crm)}</td>
-      <td class="num" style="color:var(--pre);font-weight:700">${fmtN(p.mp)}</td>
-      <td class="num" style="color:var(--evento);font-weight:700">${fmtN(p.mo)}</td>
+      <td class="num" style="color:var(--accent-fg);font-weight:700">${nocamp?'—':fmtCOP(p.cpl_crm)}</td>
+      <td class="num" style="color:var(--fg-muted);font-weight:700">${fmtN(p.mp)}</td>
+      <td class="num" style="color:var(--pos);font-weight:700">${fmtN(p.mo)}</td>
       <td class="num" style="font-weight:700;${cc}">${nocamp?'—':fmtP(p.conv)}</td>
-    </tr>`;
+    </tr>`
   }).join('');
 
   $(`${tab}-prog-table`).innerHTML=`<table>
@@ -1039,7 +1040,7 @@ function renderProgTable(tab){
       <td class="num yellow">${fmtN(tMP)}</td><td class="num yellow">${fmtN(tMO)}</td>
       <td class="num yellow">${tLC?fmtP(tMP/tLC*100):'—'}</td>
     </tr></tbody>
-  </table>`;
+  </table>`
 }
 
 function renderMesTable(tab, rg){
@@ -1050,8 +1051,8 @@ function renderMesTable(tab, rg){
     if(!r.mes) return;
     if(!mesModalMap[r.mes]) mesModalMap[r.mes]={};
     if(!mesModalMap[r.mes][r.modal]) mesModalMap[r.mes][r.modal]={};
-    CANALES.forEach(c=>{ if(!mesModalMap[r.mes][r.modal][c]) mesModalMap[r.mes][r.modal][c]=0; });
-    if(CANALES.includes(r.medio)) mesModalMap[r.mes][r.modal][r.medio]+=r.inv;
+    CANALES.forEach(c=>{ if(!mesModalMap[r.mes][r.modal][c]) mesModalMap[r.mes][r.modal][c]=0 });
+    if(CANALES.includes(r.medio)) mesModalMap[r.mes][r.modal][r.medio]+=r.inv
   });
 
   const meses=Object.keys(mesModalMap).sort();
@@ -1068,12 +1069,12 @@ function renderMesTable(tab, rg){
       const cols=CANALES.map(c=>{
         const v=modals[modal]?.[c]||0;
         mesByC[c]+=v;
-        return `<td class="num">${fmtCOP(v)}</td>`;
+        return `<td class="num">${fmtCOP(v)}</td>`
       });
       const mTot=CANALES.reduce((a,c)=>a+(modals[modal]?.[c]||0),0);
       return `<tr class="sub-row hidden" data-mes="${mes}">
         <td>${modal}</td>${cols.join('')}<td class="num bold">${fmtCOP(mTot)}</td>
-      </tr>`;
+      </tr>`
     }).join('');
 
     CANALES.forEach(c=>totG[c]+=mesByC[c]);
@@ -1084,7 +1085,7 @@ function renderMesTable(tab, rg){
       <td><i class="toggle-icon" id="ti-${mes}">▶</i>${fmtMes(mes)}</td>
       ${CANALES.map(c=>`<td class="num">${fmtCOP(mesByC[c])}</td>`).join('')}
       <td class="num bold">${fmtCOP(mesTot)}</td>
-    </tr>${subRows}`;
+    </tr>${subRows}`
   }).join('');
 
   const totRow=`<tr class="total-row"><td>TOTAL</td>
@@ -1095,12 +1096,12 @@ function renderMesTable(tab, rg){
   $(`${tab}-mes-table`).innerHTML=`<table>
     <thead><tr>
       <th>Mes / Modalidad</th>
-      <th class="num" style="color:var(--fb)">Facebook</th>
-      <th class="num" style="color:var(--go)">Google</th>
+      <th class="num" style="color:var(--fg-muted)">Facebook</th>
+      <th class="num" style="color:var(--neg)">Google</th>
       <th class="num">Total</th>
     </tr></thead>
     <tbody>${bodyRows}${totRow}</tbody>
-  </table>`;
+  </table>`
 }
 
 function toggleMes(mes){
@@ -1108,7 +1109,7 @@ function toggleMes(mes){
   const rows=document.querySelectorAll(`tr.sub-row[data-mes="${mes}"]`);
   const open=icon.classList.contains('open');
   icon.classList.toggle('open',!open);
-  rows.forEach(r=>r.classList.toggle('hidden',open));
+  rows.forEach(r=>r.classList.toggle('hidden',open))
 }
 
 function switchTab(tab,el){
@@ -1119,40 +1120,40 @@ function switchTab(tab,el){
   el.classList.add('active');
   const titles={pre:'Universidad EIA — Pregrado',pos:'Universidad EIA — Posgrado'};
   document.getElementById('topbar-title').textContent=titles[tab];
-  revealSections();
+  revealSections()
 }
 
-function applyFilters(){ processAndRender(); }
+function applyFilters(){ processAndRender() }
 function resetFilters(){
   const h=new Date();
   document.getElementById('f-desde').value=h.getFullYear()+'-01-01';
   document.getElementById('f-hasta').value=h.getFullYear()+'-'+String(h.getMonth()+1).padStart(2,'0')+'-'+String(h.getDate()).padStart(2,'0');
   document.getElementById('f-medio').value='';
   populatePeriodoSelector();
-  onPeriodoChange();
+  onPeriodoChange()
 }
 function revealSections(){
   document.querySelectorAll('#tab-'+currentTab+' .section').forEach((el,i)=>{
     el.classList.remove('visible');
-    setTimeout(()=>el.classList.add('visible'),i*90);
-  });
+    setTimeout(()=>el.classList.add('visible'),i*90)
+  })
 }
 function showLoading(on){
   document.getElementById('loading-bar').classList.toggle('active',on);
-  if(!on) document.getElementById('loader').style.display='none';
+  if(!on) document.getElementById('loader').style.display='none'
 }
 function scrollToSec(id){
   const el=document.getElementById(currentTab+'-'+id);
   if(!el) return;
   const offset=document.querySelector('.topbar')?.offsetHeight||110;
-  window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-offset-16,behavior:'smooth'});
+  window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-offset-16,behavior:'smooth'})
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
   const h=new Date();
   document.getElementById('f-desde').value='2026-02-01';
   document.getElementById('f-hasta').value=h.getFullYear()+'-'+String(h.getMonth()+1).padStart(2,'0')+'-'+String(h.getDate()).padStart(2,'0');
-  refreshData();
+  refreshData()
 });
 </script>
 </body>
