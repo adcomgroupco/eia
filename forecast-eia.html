@@ -483,22 +483,27 @@ function buildNivelTable(periodo){
   
   let h=`<div class="sec-title"><div class="sec-tl">Resumen por Nivel</div></div>
     <div class="tbl-wrap"><table class="tbl">
-    <thead><tr><th>Nivel</th><th class="r">Inversión</th><th class="r">Leads</th><th class="r">Matrículas</th><th class="r">CPL</th></tr></thead><tbody>`;
-  
+    <thead><tr><th>Nivel</th><th class="r">Inversión</th><th class="r">Aporte de pauta</th><th class="r">Leads</th><th class="r">% Conv</th><th class="r">Matrículas</th><th class="r">CPL</th></tr></thead><tbody>`;
+
   [['Pregrado','bdg-pre'],['Posgrado','bdg-pos'],['Branding','bdg-brd']].forEach(([niv,bdg])=>{
     const rows=prog.filter(r=>r.Modalidad===niv);
     if(!rows.length) return;
     const i=sum(rows,'Presupuesto'), l=sum(rows,'Leads'), m=sum(rows,'Matriculas');
+    const conv=(niv!=='Branding'&&l>0)?m/l:0;
     h+=`<tr><td><span class="bdg ${bdg}">${niv}</span></td>
       <td class="r">${fmtM(i)}</td>
+      <td class="r">${totInv>0?fmtPct(i/totInv):'—'}</td>
       <td class="r">${niv==='Branding'?'—':fmtN(l)}</td>
+      <td class="r">${niv==='Branding'?'—':fmtPct(conv)}</td>
       <td class="r">${niv==='Branding'?'—':fmtN(m)}</td>
       <td class="r">${(niv!=='Branding'&&l>0)?fmtM(i/l):'—'}</td></tr>`
   });
-  
+
   h+=`<tr class="tbl-grand"><td>TOTAL</td>
     <td class="r">${fmtM(totInv)}</td>
+    <td class="r">${totInv>0?'100.0%':'—'}</td>
     <td class="r">${fmtN(totLeads)}</td>
+    <td class="r">${totLeads>0?fmtPct(totMats/totLeads):'—'}</td>
     <td class="r">${fmtN(totMats)}</td>
     <td class="r">—</td></tr>
   </tbody></table></div>`;
@@ -548,7 +553,7 @@ function buildProgramasTable(periodo, color){
   
   let h=`<div class="tbl-wrap"><table class="tbl">
     <thead><tr>
-      <th>Programa</th><th>Nivel</th><th class="r">% Canal</th><th class="r">Presupuesto</th>
+      <th>Programa</th><th>Nivel</th><th class="r">Aporte de pauta</th><th class="r">Presupuesto</th>
       <th class="r">CPL</th><th class="r">Leads</th><th class="r">% Conv</th>
       <th class="r">Matrículas</th><th class="r">Meta</th><th class="r">% Cumpl.</th>
     </tr></thead><tbody>`;
@@ -613,7 +618,9 @@ function buildProgramasTable(periodo, color){
 function buildProgRow(r,maxP,pc){
   const pct=((Number(r.Presupuesto)||0)/maxP*100).toFixed(0);
   const bdg=r.Modalidad==='Pregrado'?'bdg-pre':'bdg-pos';
-  const cumplNum=Number(r.PctCumplimiento)||0;
+  const metaNum=Number(r.MatriculasMeta)||0;
+  const matsNum=Number(r.Matriculas)||0;
+  const cumplNum=metaNum>0?matsNum/metaNum:0;
   const cumplColor=cumplNum>=2?'color:#1A6B1A':cumplNum>=1?'color:var(--or-dark)':'color:#C0392B';
   return `<tr>
     <td title="${r.Programa}" style="max-width:220px;overflow:hidden;text-overflow:ellipsis">${r.Programa.length>35?r.Programa.substring(0,33)+'…':r.Programa}</td>
@@ -625,7 +632,7 @@ function buildProgRow(r,maxP,pc){
     <td class="r">${fmtPct(r.PctConv)}</td>
     <td class="r">${fmtN(r.Matriculas)}</td>
     <td class="r">${fmtN(r.MatriculasMeta)}</td>
-    <td class="r"><span style="${cumplColor};font-weight:600">${cumplNum?(cumplNum*100).toFixed(0)+'%':'—'}</span></td>
+    <td class="r">${metaNum>0?`<span style="${cumplColor};font-weight:600">${(cumplNum*100).toFixed(0)}%</span>`:'—'}</td>
   </tr>`
 }
 
