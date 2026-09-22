@@ -384,8 +384,8 @@ tr.no-camp td.bold{font-style:normal;color:#666}
 const SHEET_ID = '1J862C3EvVo9XEBGq0nsfPjNRKD5kTqIEu8hZFWt4Aks';
 const CB = () => `&_cb=${Date.now()}`;
 const URL_RG    = () => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=110278945${CB()}`;
-const URL_MAT   = () => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=954833082${CB()}`;
-const URL_LEADS = () => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=381850908${CB()}`;
+const URL_MAT   = () => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=188018772${CB()}`;
+const URL_LEADS = () => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=383719236${CB()}`;
 const URL_METAS = () => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=1793435013${CB()}`;
 
 let RAW_RG=[], RAW_MAT=[], RAW_LEADS=[], RAW_METAS=[];
@@ -513,21 +513,28 @@ function processAndRender(){
             inv:parseInv(r[3]),reg:parseInt(r[4])||0}
   }).filter(r=>r.fecha);
 
+  // CRM_LEADS: Id | Fuente de Posible Aspirante | Hora de creación | Periodo de interés | Programa de interés | Tipo de programa | Diseño
   const leads = RAW_LEADS.map(r=>({
-    fecha:parseFecha(r[3]).full,fuente:String(r[1]||'').trim(),
-    tipo:String(r[9]||'').trim(),prog:String(r[8]||'').trim()
+    fecha:parseFecha(r[2]).full,fuente:String(r[1]||'').trim(),
+    tipo:String(r[5]||'').trim(),prog:String(r[4]||'').trim()
   })).filter(r=>r.fecha);
 
-  const mat = RAW_MAT.map(r=>({
-    fecha:parseFecha(r[3]).full,          // Hora de creación (Admisiones)
-    periodo:String(r[34]||'').trim(),     // Periodo de interés (Admisiones)
-    fuente:String(r[12]||'').trim(),      // Fuente de Posible Aspirante (Admisiones): Pauta/Orgánico
-    tipo:String(r[38]||'').trim(),        // Tipo de programa (Admisiones): Pregrado/Posgrado
-    prog:String(r[35]||'').trim(),        // Programa de interés (Admisiones)
-    matriculado:parseInt(r[39])||0,       // Matriculado
-    adm:parseInt(r[40])||0,               // Admitido no matriculado
-    inscrito:parseInt(r[41])||0           // Inscrito
-  })).filter(r=>r.fecha);
+  // CRM_MATRICULA: Id | Nombre de Admisión | Hora de creación | Fase | Fuente de Posible Aspirante |
+  //                Periodo de interés | Programa de interés | Tipo de programa | Diseño
+  // "Fase" reemplaza a las columnas numéricas Matriculado/Admitido no matriculado/Inscrito de BD MATRICULA.
+  const mat = RAW_MAT.map(r=>{
+    const fase=String(r[3]||'').trim();
+    return {
+      fecha:parseFecha(r[2]).full,
+      periodo:String(r[5]||'').trim(),
+      fuente:String(r[4]||'').trim(),
+      tipo:String(r[7]||'').trim(),
+      prog:String(r[6]||'').trim(),
+      matriculado:fase==='Matriculado'?1:0,
+      adm:fase==='Admitido no matriculado'?1:0,
+      inscrito:fase==='Inscrito'?1:0
+    }
+  }).filter(r=>r.fecha);
 
   const metas = RAW_METAS.map(r=>({
     periodo:String(r[0]||'').trim(),
