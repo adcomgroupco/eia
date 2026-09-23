@@ -326,6 +326,10 @@ tr.no-camp td.bold{font-style:normal;color:#666}
           <div class="table-header"><div class="table-title">Inversión mensual por canal y modalidad</div></div>
           <div class="table-scroll" id="pre-mes-table"></div>
         </div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Inversión, Leads y CPL mensual — Ene 2026 a hoy</div></div>
+          <div class="table-scroll" id="pre-mes-leads-cpl-table"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -374,6 +378,10 @@ tr.no-camp td.bold{font-style:normal;color:#666}
         <div class="table-wrap">
           <div class="table-header"><div class="table-title">Inversión mensual por canal</div></div>
           <div class="table-scroll" id="pos-mes-table"></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Inversión, Leads y CPL mensual — Ene 2026 a hoy</div></div>
+          <div class="table-scroll" id="pos-mes-leads-cpl-table"></div>
         </div>
       </div>
     </div>
@@ -640,7 +648,8 @@ function renderTab(tab){
 
   buildProgData(tab, modal, rgModal, rgBrand, rgEvento, leadsModal, lPauta, lOrg, matModal, matPauta, matOrgInsc);
   renderProgTable(tab);
-  renderMesTable(tab, rg)
+  renderMesTable(tab, rg);
+  renderMesLeadsCplTable(tab)
 }
 
 function renderBrandingEvento(rgAll, metasAll){
@@ -1109,6 +1118,73 @@ function renderMesTable(tab, rg){
     </tr></thead>
     <tbody>${bodyRows}${totRow}</tbody>
   </table>`
+}
+
+// ── INVERSIÓN, LEADS Y CPL MENSUAL ────────────────────────────────────────────
+// Ventana fija Ene 2026 → hoy (igual que Compensar/Católica); respeta el filtro de
+// Canal en la inversión. Misma base que los KPIs: inversión y registros de la
+// modalidad (sin Branding/Evento) y leads CRM con Fuente=Pauta. La BD de leads
+// no trae canal, así que el filtro de Canal no aplica a Leads CRM.
+function renderMesLeadsCplTable(tab){
+  const modal=tab==='pre'?'Pregrado':'Posgrado';
+  const fM=$('f-medio')?.value||'';
+  const hoy=new Date();
+  const desde='2026-01-01';
+  const hasta=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0')+'-'+String(hoy.getDate()).padStart(2,'0');
+  const enRango=f=>f&&f>=desde&&f<=hasta;
+
+  const byMes={};
+  const bucket=mes=>byMes[mes]||(byMes[mes]={inv:0,leadsP:0,leadsCRM:0});
+  RAW_RG.forEach(r=>{
+    const f=parseFecha(r[0]);
+    if(!enRango(f.full)) return;
+    if(String(r[6]||'').trim()!==modal) return;
+    if(fM&&String(r[5]||'').trim()!==fM) return;
+    const b=bucket(f.mes);
+    b.inv+=parseInv(r[3]);
+    b.leadsP+=parseInt(r[4])||0
+  });
+  RAW_LEADS.forEach(r=>{
+    const f=parseFecha(r[2]);
+    if(!enRango(f.full)) return;
+    if(String(r[5]||'').trim()!==modal||String(r[1]||'').trim()!=='Pauta') return;
+    bucket(f.mes).leadsCRM++
+  });
+
+  const el=$(`${tab}-mes-leads-cpl-table`);
+  const meses=Object.keys(byMes).filter(Boolean).sort();
+  if(!meses.length){ el.innerHTML='<div style="padding:24px;text-align:center;color:var(--fg-muted)">Sin datos</div>'; return }
+  let tInv=0,tLP=0,tLC=0;
+  const body=meses.map(mes=>{
+    const d=byMes[mes];
+    tInv+=d.inv; tLP+=d.leadsP; tLC+=d.leadsCRM;
+    return `<tr>
+      <td>${fmtMes(mes)}</td>
+      <td class="num bold">${fmtCOP(d.inv)}</td>
+      <td class="num">${fmtNz(d.leadsP)}</td>
+      <td class="num" style="color:var(--accent-fg);font-weight:700">${fmtCOP(d.leadsP?d.inv/d.leadsP:0)}</td>
+      <td class="num bold">${fmtNz(d.leadsCRM)}</td>
+      <td class="num" style="color:var(--accent-fg);font-weight:700">${fmtCOP(d.leadsCRM?d.inv/d.leadsCRM:0)}</td>
+    </tr>`
+  }).join('');
+  const totRow=`<tr class="total-row">
+    <td>TOTAL</td>
+    <td class="num yellow">${fmtCOP(tInv)}</td>
+    <td class="num yellow">${fmtNz(tLP)}</td>
+    <td class="num yellow">${fmtCOP(tLP?tInv/tLP:0)}</td>
+    <td class="num yellow">${fmtNz(tLC)}</td>
+    <td class="num yellow">${fmtCOP(tLC?tInv/tLC:0)}</td>
+  </tr>`;
+  el.innerHTML=`<table>
+    <thead><tr>
+      <th>Mes</th>
+      <th class="num">Inversión</th>
+      <th class="num">Leads Plataforma</th>
+      <th class="num">CPL Plataforma</th>
+      <th class="num">Leads CRM Pauta</th>
+      <th class="num">CPL CRM</th>
+    </tr></thead>
+    <tbody>${body}${totRow}</tbody></table>`
 }
 
 function toggleMes(mes){
