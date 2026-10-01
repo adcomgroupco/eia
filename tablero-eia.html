@@ -371,6 +371,8 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-50);color:var(--blac
       <div class="section visible" id="pos-s1">
         <div class="section-title">Resumen General — Posgrado</div>
         <div class="kpi-grid g5" id="pos-kpi-main"></div>
+        <div class="section-title" style="margin-top:4px">Desglose por Modalidad</div>
+        <div class="desglose-grid" id="pos-desglose"></div>
       </div>
       <div class="section" id="pos-s2">
         <div class="section-title">Rendimiento por Canal</div>
@@ -391,6 +393,11 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-50);color:var(--blac
           <div class="table-header"><div class="table-title">Metas por Programa — Posgrado</div></div>
           <div class="table-scroll" id="pos-metas-table"></div>
         </div>
+        <div class="sub-section-title"><span class="dot dot-brand"></span>Branding</div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Inversión Branding vs Meta Presupuesto</div></div>
+          <div class="table-scroll" id="pos-brand-table"></div>
+        </div>
       </div>
       <div class="section" id="pos-s5">
         <div class="section-title">Leads y Matrículas por Programa</div>
@@ -407,7 +414,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-50);color:var(--blac
       <div class="section" id="pos-s6">
         <div class="section-title">Inversión Mes a Mes</div>
         <div class="table-wrap">
-          <div class="table-header"><div class="table-title">Inversión mensual por canal</div></div>
+          <div class="table-header"><div class="table-title">Inversión mensual por canal y modalidad</div></div>
           <div class="table-scroll" id="pos-mes-table"></div>
         </div>
         <div class="table-wrap">
@@ -469,6 +476,13 @@ function parseFecha(v){
 const MESES_ES=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const fmtMes = s => { const p=s.split('-'); return p.length<2?s:(MESES_ES[parseInt(p[1])]||p[1])+' '+p[0] };
 function pctClass(v){ return v>=80?'pct-good':v>=50?'pct-mid':'pct-low' }
+
+// Branding se marca en la columna Tipo de la homologación; Modalidad trae el nivel
+// (Pregrado/Posgrado). Se acepta también Modalidad='Branding' de filas antiguas.
+const esBranding = r => r.tipo==='Branding' || r.modal==='Branding';
+// METAS no tiene columna Tipo: la fila de branding se reconoce por el nombre del programa.
+const esBrandingMeta = m => m.modal==='Branding' || /branding/i.test(m.prog);
+const brandingDelNivel = (r, modal) => r.modal===modal || (modal==='Pregrado' && r.modal==='Branding');
 
 let _firstLoad=true;
 function setStatus(state){
@@ -555,6 +569,7 @@ function processAndRender(){
     const f=parseFecha(r[0]);
     return {fecha:f.full,mes:f.mes,medio:String(r[5]||'').trim(),
             modal:String(r[6]||'').trim(),prog:String(r[7]||'').trim(),
+            tipo:String(r[8]||'').trim(),
             inv:parseInv(r[3]),reg:parseInt(r[4])||0}
   }).filter(r=>r.fecha);
 
@@ -625,8 +640,8 @@ function renderTab(tab){
   if(!rg) return;
   const modal = tab==='pre'?'Pregrado':'Posgrado';
 
-  const rgModal   = rg.filter(r=>r.modal===modal);
-  const rgBrand   = tab==='pre'?rg.filter(r=>r.modal==='Branding'):[];
+  const rgModal   = rg.filter(r=>r.modal===modal&&!esBranding(r));
+  const rgBrand   = rg.filter(r=>esBranding(r)&&brandingDelNivel(r,modal));
   const rgEvento  = tab==='pre'?rg.filter(r=>r.modal==='Evento'):[];
 
   const inv_modal  = rgModal.reduce((a,r)=>a+r.inv,0);
@@ -649,7 +664,7 @@ function renderTab(tab){
   const conv_org    = lOrg.length?matOrgInsc.length/lOrg.length*100:0;
 
   $(tab+'-kpi-main').innerHTML = [
-    {l:'Inversión Total',        v:fmtCOP(inv_total),        s:tab==='pre'?'Pregrado + Branding + Evento':'Posgrado', cl:'accent'},
+    {l:'Inversión Total',        v:fmtCOP(inv_total),        s:tab==='pre'?'Pregrado + Branding + Evento':'Posgrado + Branding', cl:'accent'},
     {l:'Leads Plataforma',       v:fmtN(reg_modal),          s:modal+' (col. Registros RG)',                          cl:'accent-pre'},
     {l:'CPL Plataforma',         v:fmtCOP(cpl_plat),         s:'Inversión '+modal+' / Leads plataforma',              cl:''},
     {l:'CPL CRM — Pauta',        v:fmtCOP(cpl_crm),          s:'Inversión '+modal+' / Leads CRM pauta',               cl:''},
@@ -665,23 +680,21 @@ function renderTab(tab){
     <div class="kpi-sub">${k.s}</div>
   </div>`).join('');
 
-  if(tab==='pre'){
-    $(tab+'-desglose').innerHTML = [
-      {badge:'badge-pre',   label:'Pregrado', inv:inv_modal,  sub:`Leads plat.: ${fmtN(reg_modal)} · CPL: ${fmtCOP(cpl_plat)}`},
-      {badge:'badge-brand', label:'Branding', inv:inv_brand,  sub:'Inversión en branding'},
-      {badge:'badge-evento',label:'Eventos',  inv:inv_evento, sub:'Inversión en eventos'},
-    ].map(d=>`<div class="desglose-card">
-      <div><span class="desglose-badge ${d.badge}">${d.label}</span></div>
-      <div class="desglose-inv">${fmtCOP(d.inv)}</div>
-      <div class="desglose-sub">${d.sub}</div>
-    </div>`).join('')
-  }
+  $(tab+'-desglose').innerHTML = [
+    {badge:tab==='pre'?'badge-pre':'badge-pos', label:modal, inv:inv_modal, sub:`Leads plat.: ${fmtN(reg_modal)} · CPL: ${fmtCOP(cpl_plat)}`},
+    {badge:'badge-brand', label:'Branding', inv:inv_brand,  sub:'Inversión en branding'},
+    ...(tab==='pre'?[{badge:'badge-evento',label:'Eventos',  inv:inv_evento, sub:'Inversión en eventos'}]:[]),
+  ].map(d=>`<div class="desglose-card">
+    <div><span class="desglose-badge ${d.badge}">${d.label}</span></div>
+    <div class="desglose-inv">${fmtCOP(d.inv)}</div>
+    <div class="desglose-sub">${d.sub}</div>
+  </div>`).join('');
 
   renderCanalCards(tab, rgModal, rgBrand, rgEvento, inv_modal);
   buildCharts(tab, rgModal, lPauta);
   renderMetas(tab, modal, rgModal, lPauta, matPauta, metas);
 
-  if(tab==='pre') renderBrandingEvento(rg, metas);
+  renderBrandingEvento(tab, modal, rgBrand, rgEvento, metas);
 
   buildProgData(tab, modal, rgModal, rgBrand, rgEvento, leadsModal, lPauta, lOrg, matModal, matPauta, matOrgInsc);
   renderProgTable(tab);
@@ -689,17 +702,16 @@ function renderTab(tab){
   renderMesLeadsCplTable(tab)
 }
 
-function renderBrandingEvento(rgAll, metasAll){
-  const brand    = rgAll.filter(r=>r.modal==='Branding');
+function renderBrandingEvento(tab, modal, brand, evento, metasAll){
   const inv_fb_b = brand.filter(r=>r.medio==='Facebook').reduce((a,r)=>a+r.inv,0);
   const inv_go_b = brand.filter(r=>r.medio==='Google').reduce((a,r)=>a+r.inv,0);
   const inv_tot_b= inv_fb_b+inv_go_b;
-  const meta_b   = metasAll.filter(m=>m.modal==='Branding').reduce((a,m)=>a+m.ppto,0);
+  const meta_b   = metasAll.filter(m=>esBrandingMeta(m)&&brandingDelNivel(m,modal)).reduce((a,m)=>a+m.ppto,0);
   const ejec_b   = meta_b?inv_tot_b/meta_b*100:null;
 
-  if($('pre-brand-table')){
+  if($(tab+'-brand-table')){
     if(brand.length===0){
-      $('pre-brand-table').innerHTML='<div style="padding:20px;text-align:center;color:var(--fg-muted);font-size:12px">Sin datos de Branding en el período seleccionado</div>'
+      $(tab+'-brand-table').innerHTML='<div style="padding:20px;text-align:center;color:var(--fg-muted);font-size:12px">Sin datos de Branding en el período seleccionado</div>'
     } else {
       const progs_b = [...new Set(brand.map(r=>r.prog))];
       const rows_b  = progs_b.map(p=>{
@@ -716,7 +728,7 @@ function renderBrandingEvento(rgAll, metasAll){
           <td class="num ${pct!==null?pctClass(pct):''}">${pct!==null?fmtP(pct):'—'}</td>
         </tr>`
       }).join('');
-      $('pre-brand-table').innerHTML=`<table>
+      $(tab+'-brand-table').innerHTML=`<table>
         <thead><tr>
           <th>Campaña</th>
           <th class="num" style="color:var(--fg-muted)">Facebook</th>
@@ -739,7 +751,7 @@ function renderBrandingEvento(rgAll, metasAll){
     }
   }
 
-  const evento   = rgAll.filter(r=>r.modal==='Evento');
+  if(tab!=='pre') return;
   const progs_e  = [...new Set(evento.map(r=>r.prog))].sort();
   const inv_tot_e= evento.reduce((a,r)=>a+r.inv,0);
 
@@ -790,8 +802,8 @@ function renderCanalCards(tab, rgModal, rgBrand, rgEvento, inv_modal){
     const reg   = rc.reduce((a,r)=>a+r.reg,0);
     const cpl_p = reg?inv/reg:0;
     const part  = inv_modal?inv/inv_modal*100:0;
-    const invBE = tab==='pre'?[...rgBrand,...rgEvento].filter(r=>r.medio===c.key).reduce((a,r)=>a+r.inv,0):0;
-    const invBEstr = invBE>0?`<div style="font-size:12px;color:var(--fg-muted);margin-top:3px">B+E: ${fmtCOP(invBE)}</div>`:'';
+    const invBE = [...rgBrand,...rgEvento].filter(r=>r.medio===c.key).reduce((a,r)=>a+r.inv,0);
+    const invBEstr = invBE>0?`<div style="font-size:12px;color:var(--fg-muted);margin-top:3px">${tab==='pre'?'B+E':'Branding'}: ${fmtCOP(invBE)}</div>`:'';
     return `<div class="canal-card">
       <div class="canal-header">
         <div class="canal-icon" style="background:${c.bg}">${c.icon}</div>
@@ -871,7 +883,7 @@ function buildCharts(tab, rgModal, lPauta){
 }
 
 function renderMetas(tab, modal, rgModal, lPauta, matPauta, metasAll){
-  const metas = metasAll.filter(m=>m.modal===modal&&m.prog);
+  const metas = metasAll.filter(m=>m.modal===modal&&m.prog&&!esBrandingMeta(m));
   if(!metas.length){
     $(tab+'-metas-table').innerHTML='<div style="padding:24px;text-align:center;color:var(--fg-muted)">Sin datos de metas</div>';
     $(tab+'-metas-summary').innerHTML='';
@@ -1097,15 +1109,24 @@ function renderProgTable(tab){
 }
 
 function renderMesTable(tab, rg){
-  const modales = tab==='pre'?['Pregrado','Branding','Evento']:['Posgrado'];
+  const nivel = tab==='pre'?'Pregrado':'Posgrado';
+  const grupos = [
+    [nivel,     r=>r.modal===nivel&&!esBranding(r)],
+    ['Branding',r=>esBranding(r)&&brandingDelNivel(r,nivel)],
+    ...(tab==='pre'?[['Evento',r=>r.modal==='Evento']]:[]),
+  ];
+  const modales = grupos.map(g=>g[0]);
   const CANALES = ['Facebook','Google'];
   const mesModalMap={};
-  rg.filter(r=>modales.includes(r.modal)).forEach(r=>{
+  rg.forEach(r=>{
     if(!r.mes) return;
+    const g=grupos.find(([,fn])=>fn(r));
+    if(!g) return;
+    const k=g[0];
     if(!mesModalMap[r.mes]) mesModalMap[r.mes]={};
-    if(!mesModalMap[r.mes][r.modal]) mesModalMap[r.mes][r.modal]={};
-    CANALES.forEach(c=>{ if(!mesModalMap[r.mes][r.modal][c]) mesModalMap[r.mes][r.modal][c]=0 });
-    if(CANALES.includes(r.medio)) mesModalMap[r.mes][r.modal][r.medio]+=r.inv
+    if(!mesModalMap[r.mes][k]) mesModalMap[r.mes][k]={};
+    CANALES.forEach(c=>{ if(!mesModalMap[r.mes][k][c]) mesModalMap[r.mes][k][c]=0 });
+    if(CANALES.includes(r.medio)) mesModalMap[r.mes][k][r.medio]+=r.inv
   });
 
   const meses=Object.keys(mesModalMap).sort();
@@ -1176,6 +1197,7 @@ function renderMesLeadsCplTable(tab){
     const f=parseFecha(r[0]);
     if(!enRango(f.full)) return;
     if(String(r[6]||'').trim()!==modal) return;
+    if(String(r[8]||'').trim()==='Branding') return;
     if(fM&&String(r[5]||'').trim()!==fM) return;
     const b=bucket(f.mes);
     b.inv+=parseInv(r[3]);
