@@ -477,6 +477,22 @@ const MESES_ES=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','
 const fmtMes = s => { const p=s.split('-'); return p.length<2?s:(MESES_ES[parseInt(p[1])]||p[1])+' '+p[0] };
 function pctClass(v){ return v>=80?'pct-good':v>=50?'pct-mid':'pct-low' }
 
+// Homologación de nombres de programa entre pauta (RG), CRM y METAS.
+// La llave ignora tildes, tipo de guion, espacios y mayúsculas; los alias cubren
+// nombres que cambiaron o que la pauta abrevia.
+const progKey = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'')
+  .replace(/[–—-]/g,'-').replace(/\s*-\s*/g,' - ').replace(/\s+/g,' ').trim().toLowerCase();
+const PROG_CANON = [
+  ['Inteligencia de Negocios y Analítica de Datos', ['Inteligencia de Negocios']],
+  ['Especialización en Analítica y Ciencia de Datos', ['Especialización en Big Data e Inteligencia de Negocios']],
+  ['Maestría en Analítica y Ciencia de Datos', []],
+  ['Maestría en Administración – MBA', ['Maestría en Administración']],
+  ['Maestría en Finanzas', ['Maestría en Finanzas – MEF']],
+];
+const PROG_ALIAS = {};
+PROG_CANON.forEach(([canon,alias])=>[canon,...alias].forEach(n=>PROG_ALIAS[progKey(n)]=canon));
+const normProg = s => { const t=String(s||'').trim(); return PROG_ALIAS[progKey(t)]||t };
+
 // Branding se marca en la columna Tipo de la homologación; Modalidad trae el nivel
 // (Pregrado/Posgrado). Se acepta también Modalidad='Branding' de filas antiguas.
 const esBranding = r => r.tipo==='Branding' || r.modal==='Branding';
@@ -568,7 +584,7 @@ function processAndRender(){
   const rg = RAW_RG.map(r=>{
     const f=parseFecha(r[0]);
     return {fecha:f.full,mes:f.mes,medio:String(r[5]||'').trim(),
-            modal:String(r[6]||'').trim(),prog:String(r[7]||'').trim(),
+            modal:String(r[6]||'').trim(),prog:normProg(r[7]),
             tipo:String(r[8]||'').trim(),
             inv:parseInv(r[3]),reg:parseInt(r[4])||0}
   }).filter(r=>r.fecha);
@@ -576,7 +592,7 @@ function processAndRender(){
   // CRM_LEADS: Id | Fuente de Posible Aspirante | Hora de creación | Periodo de interés | Programa de interés | Tipo de programa | Diseño
   const leads = RAW_LEADS.map(r=>({
     fecha:parseFecha(r[2]).full,fuente:String(r[1]||'').trim(),
-    tipo:String(r[5]||'').trim(),prog:String(r[4]||'').trim()
+    tipo:String(r[5]||'').trim(),prog:normProg(r[4])
   })).filter(r=>r.fecha);
 
   // CRM_MATRICULA: Id | Nombre de Admisión | Hora de creación | Fase | Fuente de Posible Aspirante |
@@ -589,7 +605,7 @@ function processAndRender(){
       periodo:String(r[5]||'').trim(),
       fuente:String(r[4]||'').trim(),
       tipo:String(r[7]||'').trim(),
-      prog:String(r[6]||'').trim(),
+      prog:normProg(r[6]),
       matriculado:fase==='Matriculado'?1:0,
       adm:fase==='Admitido no matriculado'?1:0,
       inscrito:fase==='Inscrito'?1:0
@@ -599,7 +615,7 @@ function processAndRender(){
   const metas = RAW_METAS.map(r=>({
     periodo:String(r[0]||'').trim(),
     modal:String(r[3]||'').trim(),
-    prog:String(r[4]||'').trim(),
+    prog:normProg(r[4]),
     ppto:parseInv(r[6]),
     leads_meta:parseFloat(String(r[8]||'0').replace(',','.'))||0,
     mat_meta:parseFloat(String(r[11]||'0').replace(',','.'))||0,
