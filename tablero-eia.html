@@ -190,7 +190,7 @@ select:focus,input:focus{border-color:var(--accent-fg)}
 
     <div class="sec-title" id="sec-nivel"><span></span>Por nivel</div>
     <div class="two-col" id="nivel-grid"></div>
-    <div class="sec-title" id="sec-fuentes"><span></span>Pauta vs orgánico y otras fuentes<span class="sec-note" id="fu-note">leads y matrículas del CRM de todas las fuentes · conversión = matrículas / leads del rango · matrículas por fecha de creación (con periodo elegido, por periodo de interés) · aplican fechas y nivel</span></div>
+    <div class="sec-title" id="sec-fuentes"><span></span>Pauta vs orgánico y otras fuentes<span class="sec-note" id="fu-note">leads y matrículas del CRM de todas las fuentes · conversión = matrículas / leads del rango · matrículas por fecha de creación · aplican fechas y nivel</span></div>
     <div class="three-col" id="fuente-cards"></div>
     <div class="card chart-card"><div class="chart-wrap"><canvas id="chart-fu"></canvas></div></div>
     <div class="card tcard"><div class="tscroll"><table><thead id="fu-head"></thead><tbody id="fu-body"></tbody></table></div></div>
@@ -214,7 +214,7 @@ select:focus,input:focus{border-color:var(--accent-fg)}
       <div class="tscroll"><table><thead id="det-head"></thead><tbody id="det-body"></tbody></table></div>
       <div class="foot-note">
         <b>Leads CRM</b>: posibles aspirantes con fuente "Pauta", por fecha de creación. <b>Leads org.</b>: fuente "Orgánico".
-        <b>Admitidos y matrículas</b>: registros de admisión con fuente "Pauta" (admitidos = admitido no matriculado + matriculado). Con un periodo elegido en los atajos se cuentan por su "Periodo de interés"; con fechas libres, por fecha de creación.
+        <b>Admitidos y matrículas</b>: registros de admisión con fuente "Pauta" (admitidos = admitido no matriculado + matriculado). Se cuentan por su fecha de creación. Con un periodo elegido en los atajos, el rango de fechas va del inicio del periodo a hoy y las metas son las del periodo completo; leads, etapas y matrículas del CRM se cuentan siempre por su fecha (las matrículas, en la fecha en que se matricularon).
         <b>Metas</b>: con un periodo elegido en los atajos se toma la meta completa del periodo; con fechas libres, la parte proporcional a los días del rango. <b>CRM vs plat.</b>: diferencia entre leads CRM y leads que reporta la plataforma.
         Branding y eventos van en su propia sección y no entran en los costos. Con "Repartir" activo, la inversión, leads de plataforma y metas de campaña general y becas se reparten entre los programas del mismo nivel según sus leads CRM.
         <span class="nv nv-gen" style="margin:0">sin pauta</span> marca programas con leads CRM pero sin inversión en el rango.
@@ -411,7 +411,8 @@ function F(){ const g = id => document.getElementById(id).value;
   return { desde: g('f-desde'), hasta: g('f-hasta'), niv: g('f-nivel'), grp: g('f-grupo'), prog: g('f-programa'),
     per: QUICK[0] === 'P' ? QUICK.slice(1) : '', rep: document.getElementById('f-repartir').checked } }
 // Matrículas: con periodo elegido se toman por "Periodo de interés"; si no, por fecha de creación.
-const enRango = (r, f) => (r.src === 'mat' && f.per) ? r.per === f.per : (r.d >= f.desde && r.d <= f.hasta);
+// el CRM siempre por fecha: con periodo elegido, las fechas son las del periodo
+const enRango = (r, f) => r.d >= f.desde && r.d <= f.hasta;
 function cascade(){
   const f = F(), base = RAW.filter(r => enRango(r, f) && (!f.niv || r.niv === f.niv));
   const gs = [...new Set(base.map(r => r.grp))].sort((a, b) => (GEN_ORDER.indexOf(a) - GEN_ORDER.indexOf(b)) || a.localeCompare(b));
@@ -460,11 +461,11 @@ function render(){
   ENT = entradas(f);
   const T = M(ENT.reduce((a, e) => add(a, e), Z()));
   document.getElementById('rango-note').textContent = `${fDate(f.desde)} – ${fDate(f.hasta)} ${f.hasta.slice(0,4)} · ${days(f.desde, f.hasta)} días`;
-  document.getElementById('embudo-note').textContent = f.per ? `admitidos y matrículas del periodo de interés ${f.per}` : 'admitidos y matrículas por fecha de creación del registro';
+  document.getElementById('embudo-note').textContent = 'admitidos y matrículas por fecha de creación del registro';
   const gen = RAW.filter(r => r.gen && enRango(r, f) && (!f.niv || r.niv === f.niv)).reduce((a, r) => a + r.inv, 0);
   document.getElementById('gen-note').textContent = gen ? `Campaña general y becas: ${fCOP(gen)}, ${f.rep ? 'repartidos entre programas según leads CRM' : 'en sus propios grupos'}` : '';
   const B = renderBrand(f, (r, f) => r.d >= f.desde && r.d <= f.hasta && (!f.niv || r.niv === f.niv), r => r.niv);
-  renderKPIs(T, B); renderFunnel(T); renderFuentes(f, (r, f) => (r.kind === 'mat' && f.per ? r.per === f.per : (r.d >= f.desde && r.d <= f.hasta)) && (!f.niv || r.niv === f.niv)); renderNivel(); renderMedio(f); renderSemana(f); renderDetalle();
+  renderKPIs(T, B); renderFunnel(T); renderFuentes(f, (r, f) => (r.d >= f.desde && r.d <= f.hasta) && (!f.niv || r.niv === f.niv)); renderNivel(); renderMedio(f); renderSemana(f); renderDetalle();
 }
 
 function bar(p, lbl){ if(p === null) return '';
