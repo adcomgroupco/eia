@@ -151,6 +151,7 @@ select:focus,input:focus{border-color:var(--accent-fg)}
     <a href="#sec-medio"><b></b>Por medio</a>
     <a href="#sec-semana"><b></b>Mes a mes · semanal</a>
     <a href="#sec-detalle"><b></b>Nivel · grupo · programa</a>
+    <a href="#sec-brand"><b></b>Branding y eventos</a>
   </div>
   <div class="app-sidebar-foot">Datos cargados: <span id="last-upd-side">—</span><br><button class="tbtn" style="margin-top:6px" onclick="load()">↻ Actualizar datos</button></div>
 </nav>
@@ -170,7 +171,7 @@ select:focus,input:focus{border-color:var(--accent-fg)}
       <div class="fg"><span class="fl">Nivel</span><select id="f-nivel" onchange="onSel('nivel')"><option value="">Pregrado y posgrado</option><option>Pregrado</option><option>Posgrado</option></select></div>
       <div class="fg"><span class="fl">Grupo</span><select id="f-grupo" onchange="onSel('grupo')"><option value="">Todos</option></select></div>
       <div class="fg"><span class="fl">Programa</span><select id="f-programa" onchange="onSel('programa')"><option value="">Todos</option></select></div>
-      <label class="chk" title="Reparte la inversión de campaña general, becas, branding y eventos entre los programas del mismo nivel según sus leads CRM"><input type="checkbox" id="f-repartir" checked onchange="render()">Repartir campaña general, branding y eventos</label>
+      <label class="chk" title="Reparte la inversión de campaña general y becas entre los programas del mismo nivel según sus leads CRM"><input type="checkbox" id="f-repartir" checked onchange="render()">Repartir campaña general y becas</label>
       <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
     </div>
   </div>
@@ -206,10 +207,12 @@ select:focus,input:focus{border-color:var(--accent-fg)}
         <b>Leads CRM</b>: posibles aspirantes con fuente "Pauta", por fecha de creación. <b>Leads org.</b>: fuente "Orgánico".
         <b>Admitidos y matrículas</b>: registros de admisión con fuente "Pauta" (admitidos = admitido no matriculado + matriculado). Con un periodo elegido en los atajos se cuentan por su "Periodo de interés"; con fechas libres, por fecha de creación.
         <b>Metas</b>: se prorratean a los días del rango elegido. <b>CRM vs plat.</b>: diferencia entre leads CRM y leads que reporta la plataforma.
-        Con "Repartir" activo, la inversión, leads de plataforma y metas de campaña general, becas, branding y eventos se reparten entre los programas del mismo nivel según sus leads CRM.
+        Branding y eventos van en su propia sección y no entran en los costos. Con "Repartir" activo, la inversión, leads de plataforma y metas de campaña general y becas se reparten entre los programas del mismo nivel según sus leads CRM.
         <span class="nv nv-gen" style="margin:0">sin pauta</span> marca programas con leads CRM pero sin inversión en el rango.
       </div>
     </div>
+    <div class="sec-title" id="sec-brand"><span></span>Branding y eventos<span class="sec-note">no entra en los costos del embudo ni en la tabla de programas</span></div>
+    <div class="card tcard"><div class="tscroll"><table><thead id="brand-head"></thead><tbody id="brand-body"></tbody></table></div></div>
   </div>
 </div>
 
@@ -220,7 +223,9 @@ const GID = { rg: 110278945, mat: 188018772, leads: 383719236, metas: 1793435013
 const MESES = ['','ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const NIVELES = ['Pregrado','Posgrado'];
 
-let RAW = [], METAS = [], PERIODOS = {}, NIV_BY_PK = {}, DISP = {};
+let RAW = [], METAS = [], PERIODOS = {}, NIV_BY_PK = {}, DISP = {}, BRAND = [], BRAND_METAS = [];
+const CANAL_ORDER = ['Facebook','Google'], CANAL_LBL = {Facebook:'Meta Ads', Google:'Google Ads'};
+const BRANDING = 'Branding y eventos';
 let SORT = {col: 'inv', dir: -1}, OPEN = {}, CHART = null, QUICK = '', EVO = 'mes';
 
 // ── Parsers y formato ─────────────────────────────────────────────────────────
@@ -283,7 +288,7 @@ function grupoPrograma(niv, nombre){
   if(/^maestr/i.test(nombre)) return 'Maestrías';
   if(/^doctorado/i.test(nombre)) return 'Doctorados';
   return 'Especialidades médicas y otros' }
-const GEN_ORDER = [SIN_PROG,'Campaña general','Becas','Branding y eventos'];
+const GEN_ORDER = [SIN_PROG,'Campaña general','Becas'];
 function genKey(gen, nm){ const k = 'GEN|' + gen + '|' + prog(nm); DISP[k] = D(prog(nm)); return k }
 function nivelCRM(tipo, diseno, pk){
   if(tipo === 'Pregrado') return 'Pregrado';
@@ -311,13 +316,15 @@ function load(){
 // Une las cuatro fuentes en filas diarias con el mismo esquema:
 // RG (inversión y leads plataforma), CRM leads, CRM matrícula y METAS aparte.
 function build(rg, leads, mat, metas){
-  RAW = []; METAS = []; PERIODOS = {}; NIV_BY_PK = {}; DISP = {};
+  RAW = []; METAS = []; PERIODOS = {}; NIV_BY_PK = {}; DISP = {}; BRAND = []; BRAND_METAS = [];
   const row = (o) => RAW.push({ inv:0, lp:0, lc:0, lo:0, sol:0, adm:0, mat:0, matO:0, medio:'', per:'', ...o });
   // RG: Date | Periodo | Campaign | Amount Spent | Registros | Medio | Modalidad | Programa | Tipo
   rg.forEach(x => {
     const d = iso(x[0]), niv = String(x[6]||'').trim(), nm = String(x[7]||'').trim(), tipo = String(x[8]||'').trim();
     if(!d || !NIVELES.includes(niv) || !nm) return;
-    const gen = grupoGeneral(nm, tipo), pk = gen ? genKey(gen, nm) : prog(nm);
+    const gen = grupoGeneral(nm, tipo), medio = String(x[5]||'').trim() || 'Otro';
+    if(gen === BRANDING){ BRAND.push({ d, niv, nm, tipo: tipo === 'Evento' ? 'Evento' : 'Branding', medio, inv: num(x[3]), lp: num(x[4]) }); return }
+    const pk = gen ? genKey(gen, nm) : prog(nm);
     if(!gen) NIV_BY_PK[pk] = NIV_BY_PK[pk] || niv;
     row({ src:'rg', d, niv, pk, grp: gen || grupoPrograma(niv, D(pk)), gen: !!gen, medio: String(x[5]||'').trim() || 'Otro',
       inv: num(x[3]), lp: num(x[4]) });
@@ -328,7 +335,9 @@ function build(rg, leads, mat, metas){
     if(!ini || !fin || !nm) return;
     if(niv === 'Branding') niv = 'Pregrado';
     if(!NIVELES.includes(niv)) return;
-    const gen = grupoGeneral(nm, ''), pk = gen ? genKey(gen, nm) : prog(nm), per = String(x[0]||'').trim();
+    const gen = grupoGeneral(nm, ''), per = String(x[0]||'').trim();
+    if(gen === BRANDING){ BRAND_METAS.push({ per, ini, fin, niv, grupo: niv, ppto: num(x[6]) }); return }
+    const pk = gen ? genKey(gen, nm) : prog(nm);
     if(!gen) NIV_BY_PK[pk] = NIV_BY_PK[pk] || niv;
     METAS.push({ per, ini, fin, niv, pk, grp: gen || grupoPrograma(niv, D(pk)), gen: !!gen, ppto: num(x[6]), lm: num(x[8]), mm: num(x[11]) });
     PERIODOS[per] = PERIODOS[per] || [ini, fin];
@@ -433,17 +442,18 @@ function render(){
   document.getElementById('rango-note').textContent = `${fDate(f.desde)} – ${fDate(f.hasta)} ${f.hasta.slice(0,4)} · ${days(f.desde, f.hasta)} días`;
   document.getElementById('embudo-note').textContent = f.per ? `admitidos y matrículas del periodo de interés ${f.per}` : 'admitidos y matrículas por fecha de creación del registro';
   const gen = RAW.filter(r => r.gen && enRango(r, f) && (!f.niv || r.niv === f.niv)).reduce((a, r) => a + r.inv, 0);
-  document.getElementById('gen-note').textContent = gen ? `Campaña general, becas, branding y eventos: ${fCOP(gen)}, ${f.rep ? 'repartidos entre programas según leads CRM' : 'en sus propios grupos'}` : '';
-  renderKPIs(T); renderFunnel(T); renderNivel(); renderMedio(f); renderSemana(f); renderDetalle();
+  document.getElementById('gen-note').textContent = gen ? `Campaña general y becas: ${fCOP(gen)}, ${f.rep ? 'repartidos entre programas según leads CRM' : 'en sus propios grupos'}` : '';
+  const B = renderBrand(f, (r, f) => r.d >= f.desde && r.d <= f.hasta && (!f.niv || r.niv === f.niv), r => r.niv);
+  renderKPIs(T, B); renderFunnel(T); renderNivel(); renderMedio(f); renderSemana(f); renderDetalle();
 }
 
 function bar(p, lbl){ if(p === null) return '';
   return `<div class="kpi-bwrap"><div class="kpi-brow"><span>${lbl}</span><span class="${cls(p)}">${fP(p)}</span></div><div class="kpi-bar"><div class="kpi-bfill ${bgc(p)}" style="width:${Math.min(p*100,100)}%"></div></div></div>` }
-function renderKPIs(T){
+function renderKPIs(T, B){
   const k = (l, v, sub, extra) => `<div class="card kpi-card"><div class="kpi-label">${l}</div><div class="kpi-value">${v}</div>${sub ? `<div class="kpi-sub">${sub}</div>` : ''}${extra || ''}</div>`;
   const cplMeta = div(T.ppto, T.lm);
   document.getElementById('kpi-grid').innerHTML = [
-    k('Inversión', fCOP(T.inv), T.invG ? `${fCOP(T.invG)} de campañas generales repartidos` : 'presupuesto meta ' + fCOP(T.ppto), bar(T.cumI, 'Ejecución vs presupuesto ' + fCOP(T.ppto))),
+    k('Inversión total', fCOP(T.inv + B.inv), `conversión ${fCOP(T.inv)} · branding y eventos ${fCOP(B.inv)}`, bar(div(T.inv + B.inv, T.ppto + B.ppto), 'Ejecución vs presupuesto ' + fCOP(T.ppto + B.ppto))),
     k('Leads plataforma', fN(T.lp), 'CPL plataforma ' + fCOP(T.cplP)),
     k('Leads CRM pauta', fN(T.lc), `<span class="${difCls(T.dif)}">${T.dif === null ? '' : (T.dif > 0 ? '+' : '') + fP(T.dif) + ' vs plataforma'}</span>`, bar(T.cumL, 'Meta ' + fN(T.lm))),
     k('CPL CRM', fCOP(T.cplC), cplMeta ? 'CPL meta ' + fCOP(cplMeta) : ''),
@@ -451,7 +461,7 @@ function renderKPIs(T){
     k('Matrículas', fN(T.mat), fP(T.conv) + ' de los leads CRM', bar(T.cumM, 'Meta ' + fN(T.mm))),
     k('Costo por matrícula', fCOP(T.cpm), T.mm ? 'meta ' + fCOP(div(T.ppto, T.mm)) : ''),
     k('Leads orgánicos', fN(T.lo), fN(T.matO) + ' matrículas orgánicas'),
-    k('Programas', new Set(ENT.filter(e => (e.inv || e.lc) && !e.gen && e.grp !== SIN_PROG).map(e => e.niv + e.pk)).size, 'con inversión o leads CRM'),
+    k('Costo por matrícula total', fCOP(div(T.inv + B.inv, T.mat)), 'incluye branding y eventos'),
     k('Meta de matrículas del rango', fN(T.mm), 'prorrateada a los días elegidos'),
   ].join('');
 }
@@ -561,6 +571,34 @@ function renderDetalle(){
   const T = M(ents.reduce((a, e) => add(a, e), Z()));
   h += '<tr class="tr-total"><td>Total</td>' + cols.map(c => cell(T, c)).join('') + '</tr>';
   document.getElementById('det-body').innerHTML = h;
+}
+// ── Branding y eventos (sección aparte: fuera de los costos del embudo y de la tabla de programas) ──
+function renderBrand(f, enR, grupoDe){
+  const rows = BRAND.filter(r => r.inv && enR(r, f)), metas = BRAND_METAS.filter(m => (!f.per || !m.per || m.per === f.per) && (!f.niv || !m.niv || m.niv === f.niv) && (!f.mod || !m.mod || m.mod === f.mod));
+  const medios = CANAL_ORDER.filter(c => rows.some(r => r.medio === c && r.inv));
+  const conLp = rows.some(r => r.lp), G = {};
+  rows.forEach(r => { const g = G[grupoDe(r)] = G[grupoDe(r)] || {inv:0, lp:0, ppto:0, items:{}};
+    const it = g.items[r.nm] = g.items[r.nm] || {inv:0, lp:0, tipo:r.tipo, med:{}, dias:new Set()};
+    g.inv += r.inv; it.inv += r.inv; g.lp += r.lp || 0; it.lp += r.lp || 0; it.med[r.medio] = (it.med[r.medio] || 0) + r.inv; if(r.inv) it.dias.add(r.d) });
+  metas.forEach(m => { const a = m.ini > f.desde ? m.ini : f.desde, b = m.fin < f.hasta ? m.fin : f.hasta; if(a > b) return;
+    const g = G[m.grupo] = G[m.grupo] || {inv:0, lp:0, ppto:0, items:{}}; g.ppto += m.ppto * days(a, b) / days(m.ini, m.fin) });
+  const tot = Object.values(G).reduce((a, g) => (a.inv += g.inv, a.lp += g.lp, a.ppto += g.ppto, a), {inv:0, lp:0, ppto:0});
+  const lpTd = x => conLp ? `<td class="r">${fN(x.lp)}</td><td class="r">${fCOP(div(x.inv, x.lp))}</td>` : '';
+  document.getElementById('brand-head').innerHTML = '<tr><th>Campaña</th><th class="r">Inversión</th>' + medios.map(m => `<th class="r">${CANAL_LBL[m] || m}</th>`).join('') +
+    (conLp ? '<th class="r">Leads plat.</th><th class="r">CPL plat.</th>' : '') + '<th class="r">% de branding y eventos</th><th class="r">Días con inversión</th><th class="r grp">Presupuesto</th><th class="r">Ejecución</th></tr>';
+  const pc = v => `<td class="r ${cls(v)}">${fP(v)}</td>`;
+  let h = '';
+  Object.entries(G).sort((a, b) => b[1].inv - a[1].inv).forEach(([gk, g]) => {
+    const ej = div(g.inv, g.ppto);
+    h += `<tr class="lv1"><td>${esc(gk)}</td><td class="r">${fCOP(g.inv)}</td>` + medios.map(m => `<td class="r">${fCOP(Object.values(g.items).reduce((a, it) => a + (it.med[m] || 0), 0))}</td>`).join('') +
+      lpTd(g) + `<td class="r">${fP(div(g.inv, tot.inv))}</td><td class="r"></td><td class="r grp">${fCOP(g.ppto)}</td>${pc(ej)}</tr>`;
+    Object.entries(g.items).sort((a, b) => b[1].inv - a[1].inv).forEach(([nm, it]) => {
+      h += `<tr class="lv3"><td>${esc(nm)}<span class="nv nv-gen">${esc(it.tipo)}</span></td><td class="r">${fCOP(it.inv)}</td>` + medios.map(m => `<td class="r">${fCOP(it.med[m])}</td>`).join('') +
+        lpTd(it) + `<td class="r">${fP(div(it.inv, tot.inv))}</td><td class="r">${fN(it.dias.size)}</td><td class="r grp"></td><td class="r"></td></tr>` }) });
+  h += `<tr class="tr-total"><td>Total</td><td class="r">${fCOP(tot.inv)}</td>` + medios.map(m => `<td class="r">${fCOP(rows.filter(r => r.medio === m).reduce((a, r) => a + r.inv, 0))}</td>`).join('') +
+    lpTd(tot) + `<td class="r">${tot.inv ? '100%' : '—'}</td><td class="r"></td><td class="r grp">${fCOP(tot.ppto)}</td>${pc(div(tot.inv, tot.ppto))}</tr>`;
+  document.getElementById('brand-body').innerHTML = Object.keys(G).length ? h : '<tr><td colspan="12" class="t-mute" style="padding:16px;text-align:center">Sin inversión en branding ni eventos en el rango</td></tr>';
+  return tot;
 }
 function tog(id){
   OPEN[id] = !OPEN[id]; const ic = document.getElementById('t-' + id); if(ic) ic.classList.toggle('open', OPEN[id]);
