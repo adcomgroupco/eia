@@ -215,7 +215,7 @@ select:focus,input:focus{border-color:var(--accent-fg)}
       <div class="foot-note">
         <b>Leads CRM</b>: posibles aspirantes con fuente "Pauta", por fecha de creación. <b>Leads org.</b>: fuente "Orgánico".
         <b>Admitidos y matrículas</b>: registros de admisión con fuente "Pauta" (admitidos = admitido no matriculado + matriculado). Con un periodo elegido en los atajos se cuentan por su "Periodo de interés"; con fechas libres, por fecha de creación.
-        <b>Metas</b>: se prorratean a los días del rango elegido. <b>CRM vs plat.</b>: diferencia entre leads CRM y leads que reporta la plataforma.
+        <b>Metas</b>: con un periodo elegido en los atajos se toma la meta completa del periodo; con fechas libres, la parte proporcional a los días del rango. <b>CRM vs plat.</b>: diferencia entre leads CRM y leads que reporta la plataforma.
         Branding y eventos van en su propia sección y no entran en los costos. Con "Repartir" activo, la inversión, leads de plataforma y metas de campaña general y becas se reparten entre los programas del mismo nivel según sus leads CRM.
         <span class="nv nv-gen" style="margin:0">sin pauta</span> marca programas con leads CRM pero sin inversión en el rango.
       </div>
@@ -401,6 +401,12 @@ function setQuick(k){
   QUICK = k; cascade(); render() }
 function onDate(){ QUICK = ''; cascade(); render() }
 function onSel(){ cascade(); render() }
+// Parte de una meta que entra en el filtro: con un periodo elegido, la meta completa de ese periodo;
+// con fechas libres, proporcional a los días del rango que caen dentro de la meta.
+function share(m, f){
+  if(f.per) return m.per === f.per ? 1 : 0;
+  const a = m.ini > f.desde ? m.ini : f.desde, b = m.fin < f.hasta ? m.fin : f.hasta;
+  return a > b ? 0 : days(a, b) / days(m.ini, m.fin) }
 function F(){ const g = id => document.getElementById(id).value;
   return { desde: g('f-desde'), hasta: g('f-hasta'), niv: g('f-nivel'), grp: g('f-grupo'), prog: g('f-programa'),
     per: QUICK[0] === 'P' ? QUICK.slice(1) : '', rep: document.getElementById('f-repartir').checked } }
@@ -429,8 +435,8 @@ function entradas(f){
   RAW.forEach(r => { if(!enRango(r, f) || (f.niv && r.niv !== f.niv)) return; add(get(r.niv, r.pk, r.grp, r.gen), r) });
   METAS.forEach(m => {
     if(f.niv && m.niv !== f.niv) return;
-    const a = m.ini > f.desde ? m.ini : f.desde, b = m.fin < f.hasta ? m.fin : f.hasta; if(a > b) return;
-    const s = days(a, b) / days(m.ini, m.fin), e = get(m.niv, m.pk, m.grp, m.gen);
+    const s = share(m, f); if(!s) return;
+    const e = get(m.niv, m.pk, m.grp, m.gen);
     e.ppto += m.ppto * s; e.lm += m.lm * s; e.mm += m.mm * s });
   let list = Object.values(E);
   if(f.rep){
@@ -467,7 +473,7 @@ function renderKPIs(T, B){
   const k = (l, v, sub, extra) => `<div class="card kpi-card"><div class="kpi-label">${l}</div><div class="kpi-value">${v}</div>${sub ? `<div class="kpi-sub">${sub}</div>` : ''}${extra || ''}</div>`;
   const cplMeta = div(T.ppto, T.lm);
   document.getElementById('kpi-grid').innerHTML = [
-    k('Inversión total', fCOP(T.inv + B.inv), `conversión ${fCOP(T.inv)} · branding y eventos ${fCOP(B.inv)}`, bar(div(T.inv + B.inv, T.ppto + B.ppto), 'Ejecución vs presupuesto ' + fCOP(T.ppto + B.ppto))),
+    k('Inversión total', fCOP(T.inv + B.inv), `conversión ${fCOP(T.inv)} · branding y eventos ${fCOP(B.inv)}`, bar(div(T.inv + B.inv, T.ppto + B.ppto), (QUICK[0] === 'P' ? 'Ejecución vs presupuesto del periodo ' : 'Ejecución vs presupuesto proporcional al rango ') + fCOP(T.ppto + B.ppto))),
     k('Leads plataforma', fN(T.lp), 'CPL plataforma ' + fCOP(T.cplP)),
     k('Leads CRM pauta', fN(T.lc), `<span class="${difCls(T.dif)}">${T.dif === null ? '' : (T.dif > 0 ? '+' : '') + fP(T.dif) + ' vs plataforma'}</span>`, bar(T.cumL, 'Meta ' + fN(T.lm))),
     k('CPL CRM', fCOP(T.cplC), cplMeta ? 'CPL meta ' + fCOP(cplMeta) : ''),
@@ -476,7 +482,7 @@ function renderKPIs(T, B){
     k('Costo por matrícula', fCOP(T.cpm), T.mm ? 'meta ' + fCOP(div(T.ppto, T.mm)) : ''),
     k('Leads orgánicos', fN(T.lo), `${fN(T.matO)} matrículas orgánicas · conversión ${fP(div(T.matO, T.lo))}`),
     k('Costo por matrícula total', fCOP(div(T.inv + B.inv, T.mat)), 'incluye branding y eventos'),
-    k('Meta de matrículas del rango', fN(T.mm), 'prorrateada a los días elegidos'),
+    k(QUICK[0] === 'P' ? 'Meta de matrículas del periodo' : 'Meta de matrículas del rango', fN(T.mm), QUICK[0] === 'P' ? 'meta completa del periodo' : 'proporcional a los días elegidos'),
   ].join('');
 }
 function renderFunnel(T){
@@ -594,8 +600,8 @@ function renderBrand(f, enR, grupoDe){
   rows.forEach(r => { const g = G[grupoDe(r)] = G[grupoDe(r)] || {inv:0, lp:0, ppto:0, items:{}};
     const it = g.items[r.nm] = g.items[r.nm] || {inv:0, lp:0, tipo:r.tipo, med:{}, dias:new Set()};
     g.inv += r.inv; it.inv += r.inv; g.lp += r.lp || 0; it.lp += r.lp || 0; it.med[r.medio] = (it.med[r.medio] || 0) + r.inv; if(r.inv) it.dias.add(r.d) });
-  metas.forEach(m => { const a = m.ini > f.desde ? m.ini : f.desde, b = m.fin < f.hasta ? m.fin : f.hasta; if(a > b) return;
-    const g = G[m.grupo] = G[m.grupo] || {inv:0, lp:0, ppto:0, items:{}}; g.ppto += m.ppto * days(a, b) / days(m.ini, m.fin) });
+  metas.forEach(m => { const s = share(m, f); if(!s) return;
+    const g = G[m.grupo] = G[m.grupo] || {inv:0, lp:0, ppto:0, items:{}}; g.ppto += m.ppto * s });
   const tot = Object.values(G).reduce((a, g) => (a.inv += g.inv, a.lp += g.lp, a.ppto += g.ppto, a), {inv:0, lp:0, ppto:0});
   const lpTd = x => conLp ? `<td class="r">${fN(x.lp)}</td><td class="r">${fCOP(div(x.inv, x.lp))}</td>` : '';
   document.getElementById('brand-head').innerHTML = '<tr><th>Campaña</th><th class="r">Inversión</th>' + medios.map(m => `<th class="r">${CANAL_LBL[m] || m}</th>`).join('') +
