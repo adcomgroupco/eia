@@ -215,7 +215,7 @@ select:focus,input:focus{border-color:var(--accent-fg)}
       <div class="foot-note">
         <b>Leads CRM</b>: posibles aspirantes con fuente "Pauta", por fecha de creación. <b>Leads org.</b>: fuente "Orgánico".
         <b>Admitidos y matrículas</b>: registros de admisión con fuente "Pauta" (admitidos = admitido no matriculado + matriculado). Se cuentan por su fecha de creación. Con un periodo elegido en los atajos, el rango de fechas va del inicio del periodo a hoy y las metas son las del periodo completo; leads, etapas y matrículas del CRM se cuentan siempre por su fecha (las matrículas, en la fecha en que se matricularon).
-        <b>Metas</b>: solo las del periodo 2027-1. Con el botón "Meta 2027-1" encendido se toma la meta total del periodo; apagado, la parte proporcional a los días del rango. En los dos casos lo logrado (inversión, leads, matrículas) se cuenta por las fechas elegidas. <b>CRM vs plat.</b>: diferencia entre leads CRM y leads que reporta la plataforma.
+        <b>Lead → mat.</b>: matrículas sobre leads CRM. <b>Metas</b>: solo las del periodo 2027-1. Con el botón "Meta 2027-1" encendido se toma la meta total del periodo; apagado, la parte proporcional a los días del rango. En los dos casos lo logrado (inversión, leads, matrículas) se cuenta por las fechas elegidas. <b>CRM vs plat.</b>: diferencia entre leads CRM y leads que reporta la plataforma.
         Branding y eventos van en su propia sección y no entran en los costos. Con "Repartir" activo, la inversión, leads de plataforma y metas de campaña general y becas se reparten entre los programas del mismo nivel según sus leads CRM.
         <span class="nv nv-gen" style="margin:0">sin pauta</span> marca programas con leads CRM pero sin inversión en el rango.
       </div>
@@ -583,7 +583,7 @@ function sortBy(col){ SORT.dir = SORT.col === col ? -SORT.dir : -1; SORT.col = c
 function sorter(a, b){ const x = a.m[SORT.col], y = b.m[SORT.col];
   if(x === null && y === null) return 0; if(x === null) return 1; if(y === null) return -1; return SORT.dir * (x - y) }
 function renderDetalle(){
-  const cols = COLS_BASE.filter(c => c[0] !== 'dif' && c[0] !== 'cplP' && c[0] !== 'conv');
+  const cols = COLS_BASE.filter(c => c[0] !== 'dif' && c[0] !== 'cplP');
   cols.splice(cols.findIndex(c => c[0] === 'cpm'), 0, ['cps','Costo / solic.','cop'], ['cpa','Costo / adm.','cop']);
   cols.splice(3, 0, ['lo','Leads org.','n']);
   cols.push(...COLS_META);
