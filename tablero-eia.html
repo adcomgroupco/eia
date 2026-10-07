@@ -215,7 +215,7 @@ select:focus,input:focus{border-color:var(--accent-fg)}
       <div class="foot-note">
         <b>Leads CRM</b>: posibles aspirantes con fuente "Pauta", por fecha de creación. <b>Leads org.</b>: fuente "Orgánico".
         <b>Admitidos y matrículas</b>: registros de admisión con fuente "Pauta" (admitidos = admitido no matriculado + matriculado). Se cuentan por su fecha de creación. Con un periodo elegido en los atajos, el rango de fechas va del inicio del periodo a hoy y las metas son las del periodo completo; leads, etapas y matrículas del CRM se cuentan siempre por su fecha (las matrículas, en la fecha en que se matricularon).
-        <b>Metas</b>: con un periodo elegido en los atajos se toma la meta completa del periodo; con fechas libres, la parte proporcional a los días del rango. <b>CRM vs plat.</b>: diferencia entre leads CRM y leads que reporta la plataforma.
+        <b>Metas</b>: solo las del periodo 2027-1. Con el botón "Meta 2027-1" encendido se toma la meta total del periodo; apagado, la parte proporcional a los días del rango. En los dos casos lo logrado (inversión, leads, matrículas) se cuenta por las fechas elegidas. <b>CRM vs plat.</b>: diferencia entre leads CRM y leads que reporta la plataforma.
         Branding y eventos van en su propia sección y no entran en los costos. Con "Repartir" activo, la inversión, leads de plataforma y metas de campaña general y becas se reparten entre los programas del mismo nivel según sus leads CRM.
         <span class="nv nv-gen" style="margin:0">sin pauta</span> marca programas con leads CRM pero sin inversión en el rango.
       </div>
@@ -230,6 +230,10 @@ const SHEET_ID = '1J862C3EvVo9XEBGq0nsfPjNRKD5kTqIEu8hZFWt4Aks';
 const GV = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}&_cb=${Date.now()}`;
 const GID = { rg: 110278945, mat: 188018772, leads: 383719236, metas: 1793435013 };
 const MESES = ['','ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+// Las metas y presupuestos salen solo de este periodo; las fechas del tablero no cambian con él.
+const META_PER = '2027-1';
+// Con el botón del periodo encendido la meta es la total del periodo; lo logrado se sigue contando por las fechas elegidas.
+let META_TOTAL = false;
 const NIVELES = ['Pregrado','Posgrado'];
 
 let RAW = [], METAS = [], PERIODOS = {}, NIV_BY_PK = {}, DISP = {}, BRAND = [], BRAND_METAS = [];
@@ -381,10 +385,12 @@ function build(rg, leads, mat, metas){
 }
 
 function prepare(){
-  const q = [['sem','Esta semana'],['semAnt','Semana pasada'],['mes','Este mes']].concat(Object.keys(PERIODOS).sort().map(p => ['P'+p, p]));
-  document.getElementById('quick').innerHTML = q.map(([k,l]) => `<button class="qbtn" data-q="${k}" onclick="setQuick('${k}')">${l}</button>`).join('');
-  const hoy = todayISO(), act = Object.keys(PERIODOS).sort().reverse().find(p => PERIODOS[p][0] <= hoy && PERIODOS[p][1] >= hoy);
-  setQuick(QUICK && (QUICK[0] !== 'P' || PERIODOS[QUICK.slice(1)]) ? QUICK : act ? 'P'+act : 'mes');
+  const q = [['sem','Esta semana'],['semAnt','Semana pasada'],['mes','Este mes']];
+  document.getElementById('quick').innerHTML = q.map(([k,l]) => `<button class="qbtn" data-q="${k}" onclick="setQuick('${k}')">${l}</button>`).join('')
+    + `<span class="f-sep"></span><button class="qbtn" data-mt onclick="toggleMetaTotal()" title="Meta total del periodo ${META_PER}; las fechas no cambian">Meta ${META_PER}</button>`;
+  // con fechas libres (QUICK vacío) se respetan las que ya estén puestas
+  if(!QUICK && document.getElementById('f-desde').value && document.getElementById('f-hasta').value){ cascade(); render() }
+  else setQuick(QUICK || 'mes');
 }
 
 // ── Filtros ──────────────────────────────────────────────────────────────────
@@ -399,17 +405,18 @@ function setQuick(k){
   else { const p = PERIODOS[k.slice(1)]; a = p[0]; b = p[1] < hoy ? p[1] : hoy }
   document.getElementById('f-desde').value = a; document.getElementById('f-hasta').value = b;
   QUICK = k; cascade(); render() }
+function toggleMetaTotal(){ META_TOTAL = !META_TOTAL; render() }
 function onDate(){ QUICK = ''; cascade(); render() }
 function onSel(){ cascade(); render() }
 // Parte de una meta que entra en el filtro: con un periodo elegido, la meta completa de ese periodo;
 // con fechas libres, proporcional a los días del rango que caen dentro de la meta.
 function share(m, f){
-  if(f.per) return m.per === f.per ? 1 : 0;
+  if(META_TOTAL) return m.per === META_PER ? 1 : 0;
   const a = m.ini > f.desde ? m.ini : f.desde, b = m.fin < f.hasta ? m.fin : f.hasta;
   return a > b ? 0 : days(a, b) / days(m.ini, m.fin) }
 function F(){ const g = id => document.getElementById(id).value;
   return { desde: g('f-desde'), hasta: g('f-hasta'), niv: g('f-nivel'), grp: g('f-grupo'), prog: g('f-programa'),
-    per: QUICK[0] === 'P' ? QUICK.slice(1) : '', rep: document.getElementById('f-repartir').checked } }
+    per: '', rep: document.getElementById('f-repartir').checked } }
 // Matrículas: con periodo elegido se toman por "Periodo de interés"; si no, por fecha de creación.
 // el CRM siempre por fecha: con periodo elegido, las fechas son las del periodo
 const enRango = (r, f) => r.d >= f.desde && r.d <= f.hasta;
@@ -421,7 +428,7 @@ function cascade(){
   fill('f-programa', [...new Set(b2.map(r => r.pk))].sort((x, y) => D(x).localeCompare(D(y))), f.prog, D);
 }
 function resetFilters(){ ['f-nivel','f-grupo','f-programa'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('f-repartir').checked = true; document.getElementById('q').value = ''; QUICK = ''; prepare() }
+  document.getElementById('f-repartir').checked = true; document.getElementById('q').value = ''; QUICK = 'mes'; prepare() }
 
 // ── Cálculo ──────────────────────────────────────────────────────────────────
 const Z = () => ({inv:0, invG:0, lp:0, lc:0, lo:0, sol:0, adm:0, mat:0, matO:0, ppto:0, lm:0, mm:0});
@@ -435,7 +442,7 @@ function entradas(f){
   const E = {}, get = (niv, pk, grp, gen) => { const k = niv + '|' + pk; return E[k] = E[k] || { ...Z(), niv, pk, grp, gen } };
   RAW.forEach(r => { if(!enRango(r, f) || (f.niv && r.niv !== f.niv)) return; add(get(r.niv, r.pk, r.grp, r.gen), r) });
   METAS.forEach(m => {
-    if(f.niv && m.niv !== f.niv) return;
+    if(m.per !== META_PER) return; if(f.niv && m.niv !== f.niv) return;
     const s = share(m, f); if(!s) return;
     const e = get(m.niv, m.pk, m.grp, m.gen);
     e.ppto += m.ppto * s; e.lm += m.lm * s; e.mm += m.mm * s });
@@ -458,6 +465,7 @@ let ENT = [];
 function render(){
   const f = F(); if(!f.desde || !f.hasta) return;
   document.querySelectorAll('.qbtn[data-q]').forEach(b => b.classList.toggle('on', b.dataset.q === QUICK));
+  document.querySelectorAll('.qbtn[data-mt]').forEach(b => b.classList.toggle('on', META_TOTAL));
   ENT = entradas(f);
   const T = M(ENT.reduce((a, e) => add(a, e), Z()));
   document.getElementById('rango-note').textContent = `${fDate(f.desde)} – ${fDate(f.hasta)} ${f.hasta.slice(0,4)} · ${days(f.desde, f.hasta)} días`;
@@ -474,7 +482,7 @@ function renderKPIs(T, B){
   const k = (l, v, sub, extra) => `<div class="card kpi-card"><div class="kpi-label">${l}</div><div class="kpi-value">${v}</div>${sub ? `<div class="kpi-sub">${sub}</div>` : ''}${extra || ''}</div>`;
   const cplMeta = div(T.ppto, T.lm);
   document.getElementById('kpi-grid').innerHTML = [
-    k('Inversión total', fCOP(T.inv + B.inv), `conversión ${fCOP(T.inv)} · branding y eventos ${fCOP(B.inv)}`, bar(div(T.inv + B.inv, T.ppto + B.ppto), (QUICK[0] === 'P' ? 'Ejecución vs presupuesto del periodo ' : 'Ejecución vs presupuesto proporcional al rango ') + fCOP(T.ppto + B.ppto))),
+    k('Inversión total', fCOP(T.inv + B.inv), `conversión ${fCOP(T.inv)} · branding y eventos ${fCOP(B.inv)}`, bar(div(T.inv + B.inv, T.ppto + B.ppto), (META_TOTAL ? 'Ejecución vs presupuesto del periodo ' : 'Ejecución vs presupuesto proporcional al rango ') + fCOP(T.ppto + B.ppto))),
     k('Leads plataforma', fN(T.lp), 'CPL plataforma ' + fCOP(T.cplP)),
     k('Leads CRM pauta', fN(T.lc), `<span class="${difCls(T.dif)}">${T.dif === null ? '' : (T.dif > 0 ? '+' : '') + fP(T.dif) + ' vs plataforma'}</span>`, bar(T.cumL, 'Meta ' + fN(T.lm))),
     k('CPL CRM', fCOP(T.cplC), cplMeta ? 'CPL meta ' + fCOP(cplMeta) : ''),
@@ -483,7 +491,7 @@ function renderKPIs(T, B){
     k('Costo por matrícula', fCOP(T.cpm), T.mm ? 'meta ' + fCOP(div(T.ppto, T.mm)) : ''),
     k('Leads orgánicos', fN(T.lo), `${fN(T.matO)} matrículas orgánicas · conversión ${fP(div(T.matO, T.lo))}`),
     k('Costo por matrícula total', fCOP(div(T.inv + B.inv, T.mat)), 'incluye branding y eventos'),
-    k(QUICK[0] === 'P' ? 'Meta de matrículas del periodo' : 'Meta de matrículas del rango', fN(T.mm), QUICK[0] === 'P' ? 'meta completa del periodo' : 'proporcional a los días elegidos'),
+    k(META_TOTAL ? 'Meta de matrículas del periodo' : 'Meta de matrículas del rango', fN(T.mm), META_TOTAL ? 'meta completa del periodo' : 'proporcional a los días elegidos'),
   ].join('');
 }
 function renderFunnel(T){
@@ -595,7 +603,7 @@ function renderDetalle(){
 }
 // ── Branding y eventos (sección aparte: fuera de los costos del embudo y de la tabla de programas) ──
 function renderBrand(f, enR, grupoDe){
-  const rows = BRAND.filter(r => r.inv && enR(r, f)), metas = BRAND_METAS.filter(m => (!f.per || !m.per || m.per === f.per) && (!f.niv || !m.niv || m.niv === f.niv) && (!f.mod || !m.mod || m.mod === f.mod));
+  const rows = BRAND.filter(r => r.inv && enR(r, f)), metas = BRAND_METAS.filter(m => m.per === META_PER && (!f.niv || !m.niv || m.niv === f.niv) && (!f.mod || !m.mod || m.mod === f.mod));
   const medios = CANAL_ORDER.filter(c => rows.some(r => r.medio === c && r.inv));
   const conLp = rows.some(r => r.lp), G = {};
   rows.forEach(r => { const g = G[grupoDe(r)] = G[grupoDe(r)] || {inv:0, lp:0, ppto:0, items:{}};
