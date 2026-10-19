@@ -129,6 +129,14 @@ select:focus,input:focus{border-color:var(--accent-fg)}
 .tag-pau{background:#FFF3B0;color:#7A5B00} .tag-org{background:#E0F2FE;color:#075985} .tag-otr{background:var(--gray-100);color:var(--gray-600)}
 @media(max-width:1300px){.three-col{grid-template-columns:1fr}}
 .nm-sub{margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-200)}
+.nv-chip{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.nv-chip .car{font-size:10px;color:var(--gray-400);transition:transform .15s}
+.nv-chip.open .car{transform:rotate(90deg)}
+tr.nv-det td{background:var(--gray-50);padding:10px 14px}
+.nv-det-grid{display:flex;flex-wrap:wrap;gap:8px 28px}
+.nv-det-grp{display:flex;gap:16px;align-items:baseline}
+.nv-det-grp b{font-size:11px;color:var(--gray-600);min-width:70px}
+.nv-det-grp span{font-size:12px;color:var(--gray-400)} .nv-det-grp span i{font-style:normal;font-weight:700;color:var(--fg)}
 </style>
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAANOklEQVR42tWbf5BV5XnHP89zzt0fd3flLiVGpqgZTCIR4iisYLROFGKnk06aGgFjjThptUzFDGm1Nu2ESDrGVOOkMakJjZJYEmtEg7/S6Q8N0Ka1aFgUoSvjGplkUEHB3ZX9ee9536d/vOfssrjLnrtcUM7MmXv37pn3vM/zPs/3+S3U6DJD2Ewkl5CM+n0HZ2DM9V7mYZylcDrG+7zRglEHgFAGehHeBH6tSofDtkUx7TKHl0ett4mYi3EiWC32LTUhHFQEN/xbB+dTlk8hLPKe2VpHMxHgAZd+ehgmQQBN7yj9dOCH6EPpUOHnFW8/K5zD0xnhZmHFo2WEHCXxUUa4bWUa9VzlvVyjEefSCAyF2zs8gmEIAhgiMvrdFv5rGGTPaoRSD9QBg+Ad201sXXSQH8uFvHH4Ho4bA+wWlNWYCGZPM9UV+UKkspxGplMGP4AhOAyFdxJbBYMtsAuPEWkjQj3Qxz7g+1Ts29LG/lQKRQR/zBkw6tS3c60X+YoWOZU+8AkJhoqgHIPLDI/gNSKmGRjgVZzdKuewJsOHwzGopgzIXmD/y4dokn+gkd9lAHyZBIgme9KTlAynBWKK4AfYqGVbIW3sqpYJkhvoHkJlKc62caUvyHe1jpLvJcGOH+HjMqKFmDJvu0H7Qnwe6yyonuUBSM1F/GpEluLsOfkaTfLP6ij5gziB+N0iHkAEESH2B3EknBRNkX+ybXJHhgUpNkxeAjLiWY355+U+ncIy34XDo6LvHuHjSYMqjhKx7+EB7bSrWRIYcSRJkInEniV4/7w8qFNY4ruoCBR4D18GFW2l4Ht4TDvtcpYESzIeE3ScRYJXtxTHNrnvRCE+PdGC76KiU/i0/6D8WATPZqLx1GFsDNgUXFr3jNxGK8tOFOLfwYQSn3XPyp1yCQmbiXKpQGbnk2e5IirJT1Kkj+XY6G0GZscKJCu0UHBdtiyez4/G8hoPd0cVMLbzAS+yHWgiAaF2jo0ZOA+RgqZn4t3Ib7VkhhmmBTzK4FC/zW1YwEsWHDU/tgo8hIhgPpG12kALFayWxHsfiC60gtZDb1+4tT79TcMztTSTvgIUaKqPZW0K7DKmBGTiYe18ninyA99NIkJcM+IdREXo74M1D8GGp4zdr4b/zZwBl18qLF8MjUVw/SPSUSNJSLRE7Lrsz+LzWHOoKsgoe7+MFt8ju7TAyb5cO9H3PhDfuRsW/7nxQufYz507Cx7+pjDz9JQJWjPT6LUAPuEtrdgs5vNW5h+EV2wmkq/i6WKlTuEUP4SvFfFmIAV4qwt+b3kgvhCP6LtI+F6I4bld4ZmubqAwApI1sArqy3g9iWk+lr8QwTKrIJbF6C9Q8om8pBG/5StBf2rx8sQF/b5xtfHN+6GuAOXK2M8WYqgkcMWl8JO7haQboqiGgBiDd/So2Ydo4wCW5mAEzJW5Wk9imk9wtSLeDAoF6HsTHvj3cNrJEeK0SgJxBA8+CRseg7gVnKshIDqcTqHk4PMS8lGRAs4MFZPrGErzMbW083Wwew/sPRD+9pbDUgjccLtx4PVgIbzVzE9WhjBB/sQ2EQNORbDKVtq0kTkMYgI1xN/AzsFyigU5WOsNROH1/bDy64YWa2caRVA/gGkjZ1JiwTAIRip/SCN48DX2xCCB354GjfX5meBcUIX7/xUeeQwKpdqpAoKnAfNOPgOgaZDwCcqpiNSYAW4Ipp8G55+del5ahdMkcP3fGQf21lAVghoIsMgMVbbzAWA2g8AxSG5YqgZfua66pTNV2LsfVt5maGONVEEQhgBhFtv5oGK0aQNF7/BC7RkQKSQH4eKFcP2SEfHOcw2rwr/BI4/XRhUExDu8NlCPY75iMo8ozcUfo0sV3EG4/SZh5oxARDWqIAIraqkKghGB99Km3phdW+gbGwusAs0luGeVDNtayakKWmurECoNIJylwOlphHxMc3xRBJVuWLgIbvxcCH/zSsEoq/BoTVRBcKDCaeLa5XWNOcVXsGOd4TUDi6BchtmXGbtfC0ifR6Q13dnJU2HHBmFqKUiVyqTdYvEJbynQjK+d7z+RKvgyNE6Dqz5ZpVnMrMIBuOHWo7MKIsMq0KQYdUcLf96HoCe7neeIeWhzMHNG9fzOVOHBJ+HBh0OQ5ZKjcNONOj3q9JaDqCFspjA13HFzAJSxTsjSk9yz7yiySgI33GHs/Q1BEo7iAGOgglQvBeZBY9AW6NwFv9gGe/YZzUVh7kfg420hCVJ5OxVzSbNCBbA+WP8fNqlQ11sA1P3dsOJrxk+/JySDVB3BSAgHyzHQi9JkLj8Img/2+GA/3Hirse4JGCqP8v2YPwe+9SXhYxcAA6EhIqoLLL/hr42dvxq9GZWgOtWowoaNsH4DLF0MSVf+3IEZJhFCQp+4dtmhdczx5XxZoAzJ+4fg0muNZ3amohSNPiXvQ4Lj5j8WPn0JtBThV3vgtn80tuyEttnQ2ACvvQGdvx4BxLzAdqhV2PmI0DoFqOQLtswwrUf8EC+Ja5efaSO/7wdweUJh5yAuwZ/ebNzzKNSnGR4bw/s7lJgoDoB1/RXwpWuFU98fxLY8CM/shFV3Gf+5LbjOeSUhjgLoLv8MrLldckuBGV6LqO/nKQU6qMItjRvhlRfhh0+EzZaTsRE/c2HjKDznHTx0h3D3ncKpJwdz6PpDuemiBbBxnbBk0Uh9IJcqpIC49nHo/D+I83qJMhz3dqhi7bjUPcwBQDTAxq2B8yJHTlyaBeY4H7y/xVfA0KvgUlHNfIBKD4iD+74eYoXM/c2jjqohzfbklrC3XBYhdYXNrF0p8Es/yIBGqJHDFgjseSOf3ywp8hcbYOUfCb4nSMTh3lscQzIIxSlwz5cld+Lk0OLGnjfymzGNUN9PORKeVT7KbqCDekh7tCa8Wor5IofU1HDGqTBjOkh5/JON4zRW+ASsqDJsRqC5KPn7jOoB2MUrdKoIpsZT1KfpoolSXBWYPzsVb5sYqUVg7iygCImfOGDKwuYzZuQLmLJ9LJgd0m8TSo7gqcdU+bksxSlABXuUAdAJzGCk4PvhY+fBOR8OGxzvlLKihxlcd5mAm3hzWdjcVILvrwqqcKSCaRyFPcyeCRedD74vB3ZkKTFvjwznBAuv8Es/QAcNiNmRpcB7iAuwZpVQiNPCR1rp0fSOo/BZSWDllXDhheB686F7FEHSAwsXwl8uC2uojKypOlJJSlz4vmaVUNeQWp6JzF8D4vvoBLaYIaEwshRnavdSj0ykBpEGYhbMh8e/I0yfFjbpfNhAFhg5B1+8Cv7+bwTXG/z/KkCKpAfuuFm46ZqwduJG1nc+vPP9U+HRu4TfuSCozoQMDhlhMbEfSBsVNhONlMZ20uqHpFMjWn0ycXjsHMQnwb7XYO0GeHKLse9A8O7mzoJlfyBcdAH4XpDJlFuMUJtvhqe3wH2PG9s6oG8wEL5oAVx7uTB9RmDWRA6QGUYMaryN2Ic5hze5JdWurLnQbZW/1VZW+a58pXHnIK4PAMcQ+MEQIFEMzc6uNzV5cpRl9eY0bOsHn4A2APXh72Qot/eXaInYd3NH1GZ/ldEso/rpdlAikV3ETPOVfOXxrOMj002fhshZ1bcWl/PhPVE0EjT5KjpKvGFRAfOObi3amZzJgVHl8bSFTOVsupy3L1NEsXyp0szdzVJbwoj7W8vUehylOQYbAcW8zpKAoxk1Z7fILPan7f02qkVGBGfriaJ53Es3/6UtxGbVtaEfj85JqT5p47SZ2HezJWrju7ae6FCgf2eTlGC0c4YvyPN4Gkkm3+7Oe6F7tIBHKFOxeTKPF4/YJCWhL19lHi/rgC3XJlSVhBP0UiWhiYhBW5ESHx0+U6Bj6LSzTcSygPt9N3dSomBQOeFOHyqUKPhuvi3z+aFtIh5rskQmGoBy2+QBLfHZE6lb1KCiJQr08FOZa4uPNF+k4yC7cXHoHNGX7XO+h8e09cSQhIx4f5B/wduVafOnr6pZ+hDTaCzBa6ddTg8PpExILGfYfLwBzyDRVgoc5GFN7DLmkbB6ku3yh43FIYLZc/INmriJPvAOJ1LjdprJE+80IqIZ6OUuOde+ODzo8dUJQvwqZgNFBG9buYZ6+Q4FWnzv8Z0VGndkppmYhD7KtlLmsraakRmZzMSYbeEsX5S7tcjF9IGvvItDU03AAL9gyFZIGzvMgqMj5FNTrbKaEkzk+XREZ9sl9NkKhNe1RKwxkuKDP4aEezMSjREtEaPso9dW8lH7uLSxIzN1eYmf/ODkISJm/8PJtMhK4DqKvI/BdHBS08FJCcmhSSK6pfOmHkO1AaUB6OcAcC8D9i1ZwN7jOjg57hDlM5xCkau9l2VaYA51QHmM0VmGQVXGEOssaR1GZzUdna0Pa/kKHSr2Iyqsk3m89q6Nzh5peNrWE3EmFyLyKTwLvfERracxWON0eDodoLZDJ0ay4ek4/fTghxhE2KXCRtSeYD//nQ1FvieGp3ONz7/ALKDNe5mH5yyF04Bp7xifF3qB/Qi/ATo0tnaEdmbz4qFE1np8/v8B+tBb16075BAAAAAASUVORK5CYII=">
 </head>
@@ -189,7 +197,7 @@ select:focus,input:focus{border-color:var(--accent-fg)}
     <div class="card funnel" id="funnel"></div>
 
     <div class="sec-title" id="sec-nivel"><span></span>Por nivel</div>
-    <div class="two-col" id="nivel-grid"></div>
+    <div class="card tcard"><div class="tscroll"><table><thead id="nivel-head"></thead><tbody id="nivel-body"></tbody></table></div></div>
     <div class="sec-title" id="sec-fuentes"><span></span>Pauta vs orgánico y otras fuentes<span class="sec-note" id="fu-note">leads y matrículas del CRM de todas las fuentes · conversión = matrículas / leads del rango · matrículas por fecha de creación · aplican fechas y nivel</span></div>
     <div class="three-col" id="fuente-cards"></div>
     <div class="card chart-card"><div class="chart-wrap"><canvas id="chart-fu"></canvas></div></div>
@@ -216,7 +224,7 @@ select:focus,input:focus{border-color:var(--accent-fg)}
         <b>Leads CRM</b>: posibles aspirantes con fuente "Pauta", por fecha de creación. <b>Leads org.</b>: fuente "Orgánico".
         <b>Admitidos y matrículas</b>: registros de admisión con fuente "Pauta" (admitidos = admitido no matriculado + matriculado). Se cuentan por su fecha de creación. Con un periodo elegido en los atajos, el rango de fechas va del inicio del periodo a hoy y las metas son las del periodo completo; leads, etapas y matrículas del CRM se cuentan siempre por su fecha (las matrículas, en la fecha en que se matricularon).
         <b>Lead → mat.</b>: matrículas sobre leads CRM. <b>Metas</b>: solo las del periodo 2027-1. Con el botón "Meta 2027-1" encendido se toma la meta total del periodo; apagado, la parte proporcional a los días del rango. En los dos casos lo logrado (inversión, leads, matrículas) se cuenta por las fechas elegidas. <b>CRM vs plat.</b>: diferencia entre leads CRM y leads que reporta la plataforma.
-        Branding y eventos van en su propia sección y no entran en los costos. Con "Repartir" activo, la inversión, leads de plataforma y metas de campaña general y becas se reparten entre los programas del mismo nivel según sus leads CRM.
+        Branding y eventos van en su propia sección y no entran en los costos. <b>Evolución, metas mensuales</b>: salen de MENSUAL (curva mensual del forecast por nivel, sin branding); <b>Ejec. ppto</b> = inversión / ppto meta y <b>Cumpl. leads</b> = leads CRM / meta leads. Con el botón de meta encendido, en la vista mes a mes se toma el mes completo; apagado, la parte de los días del rango. Solo aplican sin filtro de grupo ni programa. Con "Repartir" activo, la inversión, leads de plataforma y metas de campaña general y becas se reparten entre los programas del mismo nivel según sus leads CRM.
         <span class="nv nv-gen" style="margin:0">sin pauta</span> marca programas con leads CRM pero sin inversión en el rango.
       </div>
     </div>
@@ -228,12 +236,15 @@ select:focus,input:focus{border-color:var(--accent-fg)}
 <script>
 const SHEET_ID = '1J862C3EvVo9XEBGq0nsfPjNRKD5kTqIEu8hZFWt4Aks';
 const GV = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}&_cb=${Date.now()}`;
-const GID = { rg: 110278945, mat: 188018772, leads: 383719236, metas: 1793435013 };
+const GID = { rg: 110278945, mat: 188018772, leads: 383719236, metas: 1793435013,
+  // metas mensuales por nivel (MENSUAL, la llena el script del forecast)
+  mens: 1757610172 };
 const MESES = ['','ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 // Las metas y presupuestos salen solo de este periodo; las fechas del tablero no cambian con él.
 const META_PER = '2027-1';
 // Con el botón del periodo encendido la meta es la total del periodo; lo logrado se sigue contando por las fechas elegidas.
 let META_TOTAL = false;
+let MENS = [];
 const NIVELES = ['Pregrado','Posgrado'];
 
 let RAW = [], METAS = [], PERIODOS = {}, NIV_BY_PK = {}, DISP = {}, BRAND = [], BRAND_METAS = [];
@@ -316,7 +327,10 @@ function fetchTab(gid){ return new Promise((ok, ko) => Papa.parse(GV(gid), {down
 function load(){
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('ld-msg').textContent = 'Cargando datos...';
-  Promise.all([fetchTab(GID.rg), fetchTab(GID.leads), fetchTab(GID.mat), fetchTab(GID.metas)]).then(([rg, leads, mat, metas]) => {
+  Promise.all([fetchTab(GID.rg), fetchTab(GID.leads), fetchTab(GID.mat), fetchTab(GID.metas), fetchTab(GID.mens).catch(() => [])]).then(([rg, leads, mat, metas, mens]) => {
+    // MENSUAL: Periodo | Fecha (1.º del mes) | Mes | Nivel | % Mes | Presupuesto | Meta leads | CPL meta. Solo Pregrado y Posgrado (el branding va aparte)
+    MENS = mens.filter(x => !/^periodo$/i.test(String(x[0]).trim())).map(x => ({ mes: iso(x[1]).slice(0,7), niv: String(x[3]||'').trim(), ppto: num(x[5]), lm: num(x[6]) }))
+      .filter(m => m.mes && (m.niv === 'Pregrado' || m.niv === 'Posgrado'));
     [rg, leads, mat, metas].forEach(d => { if(d.length && /^(date|fecha|id|periodo)$/i.test(String(d[0][0]).trim())) d.shift() });
     build(rg, leads, mat, metas); prepare();
     const t = new Date().toLocaleString('es-CO', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
@@ -431,11 +445,12 @@ function resetFilters(){ ['f-nivel','f-grupo','f-programa'].forEach(id => docume
   document.getElementById('f-repartir').checked = true; document.getElementById('q').value = ''; QUICK = 'mes'; prepare() }
 
 // ── Cálculo ──────────────────────────────────────────────────────────────────
-const Z = () => ({inv:0, invG:0, lp:0, lc:0, lo:0, sol:0, adm:0, mat:0, matO:0, ppto:0, lm:0, mm:0});
+const Z = () => ({inv:0, invG:0, lp:0, lc:0, lo:0, sol:0, adm:0, mat:0, matO:0, ppto:0, lm:0, mm:0, pm:0, lmm:0});
 const NUM = Object.keys(Z());
 function add(a, b){ NUM.forEach(k => a[k] += b[k] || 0); return a }
 function M(e){ return { ...e, dif: e.lp ? e.lc/e.lp - 1 : null, cplP: div(e.inv, e.lp), cplC: div(e.inv, e.lc), cps: div(e.inv, e.sol), cpa: div(e.inv, e.adm), cpm: div(e.inv, e.mat),
-  conv: div(e.mat, e.lc), cumL: div(e.lc, e.lm), cumM: div(e.mat, e.mm), cumI: div(e.inv, e.ppto) } }
+  conv: div(e.mat, e.lc), cumL: div(e.lc, e.lm), cumM: div(e.mat, e.mm), cumI: div(e.inv, e.ppto),
+  cumP: div(e.inv, e.pm), cumLm: div(e.lc, e.lmm), cplM: div(e.pm, e.lmm) } }
 
 // Filas del rango + nivel -> entradas por nivel·programa (con reparto y metas), luego filtro de grupo/programa
 function entradas(f){
@@ -457,6 +472,14 @@ function entradas(f){
   }
   return list.filter(e => (!f.grp || e.grp === f.grp) && (!f.prog || e.pk === f.prog));
 }
+// Meta mensual (MENSUAL) que cae entre a y b: cada mes aporta su meta × días del mes dentro del rango / días del mes
+function metaMensual(a, b, niv){
+  const out = {pm:0, lmm:0};
+  MENS.forEach(m => { if(niv && m.niv !== niv) return;
+    const ini = m.mes + '-01', fin = addDays(new Date(Date.UTC(+m.mes.slice(0,4), +m.mes.slice(5,7), 1)).toISOString().slice(0,10), -1);
+    const x = a > ini ? a : ini, y = b < fin ? b : fin; if(x > y) return;
+    const s = days(x, y) / days(ini, fin); out.pm += m.ppto * s; out.lmm += m.lm * s });
+  return out }
 function filasRango(f){ // filas diarias con todos los filtros (para semana y medio; sin reparto)
   return RAW.filter(r => enRango(r, f) && (!f.niv || r.niv === f.niv) && (!f.grp || r.grp === f.grp) && (!f.prog || r.pk === f.prog)) }
 
@@ -510,20 +533,36 @@ function renderFunnel(T){
     <div class="f-track"><div class="f-fill${i === steps.length - 1 ? ' dark' : ''}" style="width:${Math.max(v/mx*100, .4)}%"></div></div>
     <div class="f-val"><b>${fN(v)}</b><span class="t-mute">${c}</span></div><div class="f-cost">${costo(v, meta)}</div></div>`).join('');
 }
+// Por nivel: una fila por nivel con lo principal; el chip abre una fila con el detalle del embudo y otras fuentes
+const COLS_NIV = [['inv','Inversión','cop'],['cumI','Ejec. ppto','cum'],['lc','Leads CRM','n',1],['cplC','CPL CRM','cop'],['cumL','Cumpl. leads','cum'],
+  ['sol','Solicitudes','n',1],['mat','Matrículas','n'],['cpm','Costo / mat.','cop'],['cumM','Cumpl. mat.','cum']];
+let OPEN_NIV = {};
+function togNiv(n){ OPEN_NIV[n] = !OPEN_NIV[n]; renderNivel() }
 function renderNivel(){
-  const card = (niv, tag) => { const e = M(ENT.filter(x => x.niv === niv).reduce((a, x) => add(a, x), Z()));
-    const it = (l, v, c) => `<div><div class="nm-label">${l}</div><div class="nm-value ${c||''}">${v}</div></div>`;
-    return `<div class="card nivel-card"><span class="nivel-tag ${tag}">${niv}</span><div class="nm-grid">
-      ${it('Inversión', fCOP(e.inv))}${it('Leads plataforma', fN(e.lp))}${it('Leads CRM', fN(e.lc))}${it('CRM vs plat.', e.dif === null ? '—' : (e.dif > 0 ? '+' : '') + fP(e.dif), difCls(e.dif))}
-      ${it('CPL CRM', fCOP(e.cplC))}${it('Costo / solicitud', fCOP(e.cps))}${it('Costo / admitido', fCOP(e.cpa))}${it('Costo / matrícula', fCOP(e.cpm))}
-      ${it('Solicitudes', fN(e.sol))}${it('Admitidos', fN(e.adm))}${it('Matrículas', fN(e.mat))}${it('Lead → matrícula', fP(e.conv))}
-      ${it('Meta leads', fN(e.lm))}${it('Cumpl. leads', fP(e.cumL), cls(e.cumL))}${it('Meta matrículas', fN(e.mm))}${it('Cumpl. matrículas', fP(e.cumM), cls(e.cumM))}
-      ${it('Presupuesto', fCOP(e.ppto))}${it('Ejecución', fP(e.cumI), cls(e.cumI))}
-    </div>${fuentesNivel(niv)}</div>` };
-  document.getElementById('nivel-grid').innerHTML = card('Pregrado', 'tag-pre') + card('Posgrado', 'tag-pos');
+  const tags = {'Pregrado':'tag-pre','Posgrado':'tag-pos'};
+  const v = (l, x, c) => `<span>${l} <i class="${c||''}">${x}</i></span>`;
+  const grp = (t, items) => `<div class="nv-det-grp"><b>${t}</b>${items.join('')}</div>`;
+  const fila = (niv, e) => {
+    const tag = tags[niv], open = !!OPEN_NIV[niv], n = FU_NIV[niv], cv = k => fP(div(n[k].mat, n[k].lc));
+    let h = `<tr${tag ? '' : ' class="tr-total"'}><td>${tag ? `<span class="nv-chip${open ? ' open' : ''}" onclick="togNiv('${niv}')"><span class="car">▶</span><span class="nivel-tag ${tag}" style="margin:0">${niv}</span></span>` : 'Total'}</td>` +
+      COLS_NIV.map(c => cell(e, c)).join('') + '</tr>';
+    if(tag && open) h += `<tr class="nv-det"><td colspan="${COLS_NIV.length + 1}"><div class="nv-det-grid">` +
+      grp('Plataforma', [v('Leads', fN(e.lp)), v('CPL', fCOP(e.cplP)), v('CRM vs plat.', e.dif === null ? '—' : (e.dif > 0 ? '+' : '') + fP(e.dif), difCls(e.dif))]) +
+      grp('Embudo', [v('Costo / solicitud', fCOP(e.cps)), v('Admitidos', fN(e.adm)), v('Costo / adm.', fCOP(e.cpa)),
+        v('Lead → solicitud', fP(div(e.sol, e.lc))), v('Solicitud → mat.', fP(div(e.mat, e.sol))), v('Lead → mat.', fP(e.conv))]) +
+      grp('Metas', [v('Ppto', fCOP(e.ppto)), v('Leads', fN(e.lm)), v('Matrículas', fN(e.mm))]) +
+      (n ? grp('Orgánico', [v('Leads', fN(n['Orgánico'].lc)), v('Mat.', fN(n['Orgánico'].mat)), v('Conv.', cv('Orgánico'))]) +
+           grp('Otras fuentes', [v('Leads', fN(n['Otras fuentes'].lc)), v('Mat.', fN(n['Otras fuentes'].mat)), v('Conv.', cv('Otras fuentes'))]) : '') +
+      '</div></td></tr>';
+    return h };
+  const tot = niv => M(ENT.filter(x => x.niv === niv).reduce((a, x) => add(a, x), Z()));
+  const pre = tot('Pregrado'), pos = tot('Posgrado'), T = M(add(add(Z(), pre), pos));
+  document.getElementById('nivel-head').innerHTML = head('Nivel', COLS_NIV, false);
+  document.getElementById('nivel-body').innerHTML = fila('Pregrado', pre) + fila('Posgrado', pos) + fila('Total', T);
 }
 const COLS_BASE = [['inv','Inversión','cop'],['lp','Leads plat.','n'],['lc','Leads CRM','n'],['dif','CRM vs plat.','dif'],['cplP','CPL plat.','cop'],['cplC','CPL CRM','cop'],
   ['adm','Admitidos','n'],['mat','Matrículas','n'],['cpm','Costo / mat.','cop'],['conv','Lead → mat.','pct']];
+const COLS_MES = [['pm','Ppto meta','cop',1],['cumP','Ejec. ppto','cum'],['lmm','Meta leads','n'],['cumLm','Cumpl. leads','cum'],['cplM','CPL meta','cop']];
 const COLS_META = [['lm','Meta leads','n',1],['cumL','Cumpl. leads','cum'],['mm','Meta mat.','n'],['cumM','Cumpl. mat.','cum'],['ppto','Presupuesto','cop',1],['cumI','Ejecución','cum']];
 function cell(e, [k, , t, grp]){ const v = e[k], g = grp ? ' grp' : '';
   if(t === 'cop') return `<td class="r${g}">${fCOP(v)}</td>`;
@@ -557,12 +596,20 @@ function setEvo(k){ EVO = k; document.querySelectorAll('[data-ev]').forEach(b =>
 function renderSemana(f){
   // la evolución usa siempre fecha de creación (también para matrículas)
   const fr = { ...f, per: '' }, mes = EVO === 'mes', rows = filasRango(fr), g = groupRows(rows, r => mes ? r.d.slice(0,7) : weekStart(r.d)), ks = Object.keys(g).sort();
-  document.getElementById('semana-note').textContent = (f.grp || f.prog) ? 'con filtro de grupo o programa la inversión es solo la directa' : (mes ? 'por mes calendario · matrículas por fecha de creación' : 'semanas de lunes a domingo · matrículas por fecha de creación');
+  // metas mensuales: solo por nivel; con filtro de grupo o programa no aplican
+  const conMeta = !f.grp && !f.prog;
+  if(conMeta) ks.forEach(k => {
+    let a = mes ? k + '-01' : k, b = mes ? addDays(new Date(Date.UTC(+k.slice(0,4), +k.slice(5,7), 1)).toISOString().slice(0,10), -1) : addDays(k, 6);
+    if(!(mes && META_TOTAL)) { if(f.desde > a) a = f.desde; if(f.hasta < b) b = f.hasta }
+    Object.assign(g[k], metaMensual(a, b, f.niv)) });
+  document.getElementById('semana-note').textContent = [(f.grp || f.prog) ? 'con filtro de grupo o programa la inversión es solo la directa' : (mes ? 'por mes calendario · matrículas por fecha de creación' : 'semanas de lunes a domingo · matrículas por fecha de creación'),
+    conMeta ? (mes && META_TOTAL ? 'meta del mes completo' : 'meta mensual proporcional a los días del rango') : 'metas mensuales solo sin filtro de grupo ni programa'].join(' · ');
   const lab = k => mes ? MESES[+k.slice(5,7)].replace(/^./, c => c.toUpperCase()) + ' ' + k.slice(0,4) : `${fDate(k)} – ${fDate(addDays(k, 6))}`;
-  document.getElementById('sem-head').innerHTML = head(mes ? 'Mes' : 'Semana', COLS_BASE, false);
+  const cols = COLS_BASE.concat(COLS_MES);
+  document.getElementById('sem-head').innerHTML = head(mes ? 'Mes' : 'Semana', cols, false);
   const T = M(ks.reduce((a, k) => add(a, g[k]), Z()));
-  document.getElementById('sem-body').innerHTML = ks.slice().reverse().map(k => '<tr><td>' + lab(k) + '</td>' + COLS_BASE.map(c => cell(M(g[k]), c)).join('') + '</tr>').join('') +
-    '<tr class="tr-total"><td>Total</td>' + COLS_BASE.map(c => cell(T, c)).join('') + '</tr>';
+  document.getElementById('sem-body').innerHTML = ks.slice().reverse().map(k => '<tr><td>' + lab(k) + '</td>' + cols.map(c => cell(M(g[k]), c)).join('') + '</tr>').join('') +
+    '<tr class="tr-total"><td>Total</td>' + cols.map(c => cell(T, c)).join('') + '</tr>';
   const css = getComputedStyle(document.body), fg = css.getPropertyValue('--fg-muted').trim() || '#888';
   const data = { labels: ks.map(k => mes ? lab(k) : fDate(k)), datasets: [
     { type:'bar', label:'Inversión', data: ks.map(k => Math.round(g[k].inv)), backgroundColor:'rgba(255,212,0,.55)', yAxisID:'y1', order:3 },
@@ -673,10 +720,6 @@ function renderFuentes(f, enR){
   CHART_FU = new Chart(document.getElementById('chart-fu'), { data, options: opts });
 }
 // fila extra de las tarjetas por nivel
-function fuentesNivel(niv){ const n = FU_NIV[niv]; if(!n) return '';
-  const it = (l, v, c) => `<div><div class="nm-label">${l}</div><div class="nm-value ${c||''}">${v}</div></div>`, cv = k => div(n[k].mat, n[k].lc);
-  return '<div class="nm-grid nm-sub">' + it('Leads orgánicos', fN(n['Orgánico'].lc)) + it('Mat. orgánicas', fN(n['Orgánico'].mat)) + it('Conv. pauta (CRM)', fP(cv('Pauta'))) + it('Conv. orgánica', fP(cv('Orgánico'))) +
-    it('Leads otras fuentes', fN(n['Otras fuentes'].lc)) + it('Mat. otras fuentes', fN(n['Otras fuentes'].mat)) + it('Conv. otras fuentes', fP(cv('Otras fuentes'))) + '</div>' }
 function tog(id){
   OPEN[id] = !OPEN[id]; const ic = document.getElementById('t-' + id); if(ic) ic.classList.toggle('open', OPEN[id]);
   document.querySelectorAll(`tr[data-p="${id}"]`).forEach(tr => {
