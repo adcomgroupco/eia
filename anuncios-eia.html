@@ -230,11 +230,10 @@ details[open] summary::after{content:"–"}
 <script>
 // Los anuncios salen de data/anuncios-eia.json, que genera Ads-CLI
 // (scripts/clients/compensar/anuncios_tablero.py --client eia) con las APIs de Meta y Google.
-// EIA no tiene pestaña de homologación: programa, nivel y tipo salen del nombre de la campaña
-// y vienen en el JSON.
+// La homologación se lee en vivo de la pestaña Homologacion del Sheet y se cruza por nombre de campaña (exacto); si falla, se usa la copia del JSON.
 const DATA_URL='data/anuncios-eia.json';
-const SHEET_ID='';
-const HOMO_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('Homologación');
+const SHEET_ID='1J862C3EvVo9XEBGq0nsfPjNRKD5kTqIEu8hZFWt4Aks';
+const HOMO_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent('Homologacion');
 
 const S={ads:[],homoRows:[],homoKeys:[],avatars:{},tab:'all',view:'feed',cardView:{},rot:{}};
 
@@ -264,7 +263,7 @@ async function init(){
   S.homoRows=d.h||[];S.homoKeys=d.hk||[];
   const old=(Date.now()-new Date(d.generado))/36e5>72;
   $('sub').innerHTML='Datos al <b class="'+(old?'old':'')+'" title="'+(old?'Tienen más de 3 días: pide actualizar el tablero':'Fecha en que se consultaron las APIs')+'">'+fDate(d.generado)+'</b> · solo anuncios activos';
-  if(SHEET_ID) try{const rows=await loadHomo();if(rows.length){S.homoRows=rows;S.homoKeys=homoKeysOf(rows)}}
+  try{const rows=await loadHomo();if(rows.length){S.homoRows=rows;S.homoKeys=homoKeysOf(rows)}}
   catch(e){toast('Homologación en vivo no disponible; se usa la copia del '+fDate(d.generado))}
   S.ads.forEach(applyH);
   if(d.errores&&d.errores.length) toast('La última actualización tuvo errores: '+d.errores.join(' · '));
@@ -292,26 +291,18 @@ const campCol=r=>Object.keys(r).find(k=>/campa|campaign/i.test(k))||Object.keys(
 const campKey=r=>r[campCol(r)]||'';
 function homoKeysOf(rows){const c=campCol(rows[0]);return Object.keys(rows[0]).filter(k=>k!==c&&k.trim())}
 async function loadHomo(){const r=await fetch(HOMO_URL+'&_cb='+Date.now());if(!r.ok) throw new Error('HTTP '+r.status);return parseCSV(await r.text())}
-function lookup(name,fuzzy){
-  const k=norm(name);if(!k) return null;
-  const R=S.homoRows;
-  const hit=R.find(r=>norm(campKey(r))===k)||R.find(r=>{const rk=norm(campKey(r));return rk.length>4&&(k.includes(rk)||rk.includes(k))});
-  if(hit||!fuzzy) return hit||null;
-  let best=null,bs=0;const pw=new Set(k.split(/[\s_\-]+/).filter(w=>w.length>3));
-  for(const r of R){
-    const rw=new Set(norm(campKey(r)).split(/[\s_\-]+/).filter(w=>w.length>3));
-    if(!pw.size||!rw.size) continue;
-    const sc=[...pw].filter(w=>rw.has(w)).length/Math.max(pw.size,rw.size);
-    if(sc>bs&&sc>=.3){bs=sc;best=r}
-  }
-  return best
+const ck=s=>norm(s).replace(/[\s\-–]+$/,'');
+function lookup(name){
+  // Cruce exacto por nombre de campaña (sin tildes, mayúsculas ni guion final): el Sheet es la fuente.
+  const k=ck(name);if(!k) return null;
+  return S.homoRows.find(r=>ck(campKey(r))===k)||null
 }
 function applyH(ad){
-  const h=lookup(ad.campaign_name,ad.medium==='Google');
+  const h=lookup(ad.campaign_name);
   ad.h={};
   if(h) S.homoKeys.forEach(k=>{if(h[k]) ad.h[k]=h[k]});
   const f=re=>{const k=Object.keys(ad.h).find(k=>re.test(k));return k?ad.h[k]:''};
-  ad.programa=f(/^programa general$/i)||f(/programa/i);
+  ad.programa=f(/^programa general$/i)||f(/^programa$/i)||f(/programa/i);
 }
 
 /* ── filtros ── */
